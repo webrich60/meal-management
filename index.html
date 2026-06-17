@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>毎日の健康食事アドバイザー</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-emerald-50">
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useRef, useEffect } = React;
+
+    const Camera = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>);
+    const ImageIcon = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>);
+    const Activity = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>);
+    const AlertCircle = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>);
+    const Heart = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>);
+    const Info = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>);
+    const CheckCircle = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>);
+    const Utensils = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>);
+    const RefreshCw = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>);
+    const Settings = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>);
+    const Save = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>);
+    const HistoryIcon = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>);
+    const ArrowLeft = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m15 18-6-6 6-6"/></svg>);
+    const ChevronDown = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 9 6 6 6-6"/></svg>);
+    const Calendar = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>);
+    const UserIcon = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>);
+    const ScaleIcon = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M12 9v4"/><path d="M10 13h4"/></svg>);
+    const FileText = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>);
+    const Edit = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>);
+    const X = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>);
+    const Coffee = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/></svg>);
+
+    const PFCDonutChart = ({ protein, fat, carbs }) => {
+      const pCal = protein * 4;
+      const fCal = fat * 9;
+      const cCal = carbs * 4;
+      const total = pCal + fCal + cCal || 1; 
+
+      const pPct = (pCal / total) * 100;
+      const fPct = (fCal / total) * 100;
+      const cPct = (cCal / total) * 100;
+
+      return (
+        <div className="flex flex-col items-center justify-center">
+          <div className="relative w-32 h-32 mb-4">
+            <svg viewBox="0 0 40 40" className="w-full h-full -rotate-90 drop-shadow-md">
+              <circle r="15.915" cx="20" cy="20" fill="transparent" stroke="#f3f4f6" strokeWidth="6" />
+              {pPct > 0 && <circle r="15.915" cx="20" cy="20" fill="transparent" stroke="#3b82f6" strokeWidth="6" strokeDasharray={`${pPct} ${100 - pPct}`} strokeDashoffset="0" className="transition-all duration-1000 ease-out" />}
+              {fPct > 0 && <circle r="15.915" cx="20" cy="20" fill="transparent" stroke="#ef4444" strokeWidth="6" strokeDasharray={`${fPct} ${100 - fPct}`} strokeDashoffset={`-${pPct}`} className="transition-all duration-1000 ease-out" />}
+              {cPct > 0 && <circle r="15.915" cx="20" cy="20" fill="transparent" stroke="#f59e0b" strokeWidth="6" strokeDasharray={`${cPct} ${100 - cPct}`} strokeDashoffset={`-${pPct + fPct}`} className="transition-all duration-1000 ease-out" />}
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+              <span className="text-xs text-gray-500 font-medium">PFC</span>
+              <span className="text-sm font-bold text-gray-700">バランス</span>
+            </div>
+          </div>
+          <div className="flex justify-center space-x-4 text-sm font-medium">
+            <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-blue-500 mr-1"></span>P: {protein}g</div>
+            <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-red-500 mr-1"></span>F: {fat}g</div>
+            <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-yellow-500 mr-1"></span>C: {carbs}g</div>
+          </div>
+        </div>
+      );
+    };
+
+    // ★ 編集モーダルコンポーネント
+    const EditModal = ({ item, onSave, onClose, gasUrl }) => {
+      const [formData, setFormData] = useState({
+        mealName: item.mealName ? item.mealName.replace(/^\[.*?\]\s*/, '') : "",
+        calories: item.calories || 0,
+        protein: item.protein || 0,
+        fat: item.fat || 0,
+        carbs: item.carbs || 0,
+        salt: item.salt || 0,
+        weight: item.weight || ""
+      });
+      const [isSaving, setIsSaving] = useState(false);
+
+      const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+          ...prev,
+          [name]: name === 'mealName' ? value : (value === '' ? '' : Number(value))
+        }));
+      };
+
+      const handleSave = async () => {
+        setIsSaving(true);
+        try {
+          const response = await fetch(gasUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({
+              action: "update",
+              targetDate: item.date,
+              recordData: formData
+            })
+          });
+          const data = await response.json();
+          if (data.status === "error") throw new Error(data.message);
+          
+          // 親コンポーネントに保存完了を通知
+          onSave(formData);
+        } catch (err) {
+          alert("保存に失敗しました: " + err.message);
+        } finally {
+          setIsSaving(false);
+        }
+      };
+
+      return (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm max-h-[90vh] flex flex-col shadow-2xl animate-fade-in">
+            <div className="p-4 border-b flex justify-between items-center bg-emerald-600 text-white rounded-t-2xl">
+              <h3 className="font-bold flex items-center"><Edit size={18} className="mr-2"/>記録の編集</h3>
+              <button onClick={onClose} className="p-1 hover:bg-emerald-700 rounded-full"><X size={20}/></button>
+            </div>
+            
+            <div className="p-5 overflow-y-auto space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">食事名 (内容)</label>
+                <input type="text" name="mealName" value={formData.mealName} onChange={handleChange} className="w-full border rounded-lg p-2 text-sm focus:border-emerald-500 outline-none" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1">カロリー (kcal)</label>
+                  <input type="number" name="calories" value={formData.calories} onChange={handleChange} className="w-full border rounded-lg p-2 text-sm focus:border-emerald-500 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1">塩分 (g)</label>
+                  <input type="number" step="0.1" name="salt" value={formData.salt} onChange={handleChange} className="w-full border rounded-lg p-2 text-sm focus:border-emerald-500 outline-none" />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1">タンパク質 (g)</label>
+                  <input type="number" step="0.1" name="protein" value={formData.protein} onChange={handleChange} className="w-full border rounded-lg p-2 text-sm focus:border-emerald-500 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1">脂質 (g)</label>
+                  <input type="number" step="0.1" name="fat" value={formData.fat} onChange={handleChange} className="w-full border rounded-lg p-2 text-sm focus:border-emerald-500 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1">炭水化物 (g)</label>
+                  <input type="number" step="0.1" name="carbs" value={formData.carbs} onChange={handleChange} className="w-full border rounded-lg p-2 text-sm focus:border-emerald-500 outline-none" />
+                </div>
+              </div>
+              <div className="pt-2">
+                <label className="block text-xs font-bold text-gray-600 mb-1">体重 (kg)</label>
+                <input type="number" step="0.1" name="weight" value={formData.weight} onChange={handleChange} className="w-full border rounded-lg p-2 text-sm focus:border-emerald-500 outline-none" />
+              </div>
+            </div>
+
+            <div className="p-4 border-t bg-gray-50 rounded-b-2xl flex space-x-3">
+              <button onClick={onClose} className="flex-1 bg-white border border-gray-300 text-gray-600 font-bold py-2.5 rounded-xl hover:bg-gray-100">キャンセル</button>
+              <button onClick={handleSave} disabled={isSaving} className="flex-1 bg-emerald-600 text-white font-bold py-2.5 rounded-xl hover:bg-emerald-700 flex items-center justify-center">
+                {isSaving ? <RefreshCw size={18} className="animate-spin" /> : "上書き保存"}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    function App() {
+      const [gasUrl, setGasUrl] = useState("");
+      const [showSettings, setShowSettings] = useState(false);
+      const [tempUrl, setTempUrl] = useState("");
+      
+      const [nickname, setNickname] = useState("ゆず");
+      const [age, setAge] = useState("");
+      const [gender, setGender] = useState("");
+      const [height, setHeight] = useState("");
+      const [weight, setWeight] = useState("");
+      const [medicalConditions, setMedicalConditions] = useState("");
+
+      const [selectedDate, setSelectedDate] = useState(() => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      });
+
+      const [mealType, setMealType] = useState('朝ご飯'); 
+      const [imagePreview, setImagePreview] = useState(null);
+      const [loading, setLoading] = useState(false);
+      const [result, setResult] = useState(null);
+      const [error, setError] = useState("");
+      
+      const [showHistory, setShowHistory] = useState(false);
+      const [historyData, setHistoryData] = useState([]);
+      const [historyLoading, setHistoryLoading] = useState(false);
+      const [visibleCount, setVisibleCount] = useState(10); 
+      
+      // ★ 新機能：テキスト入力と編集状態
+      const [showTextInput, setShowTextInput] = useState(false);
+      const [textInputData, setTextInputData] = useState("");
+      const [editingItem, setEditingItem] = useState(null); // 編集中のアイテム
+
+      const cameraInputRef = useRef(null);
+      const galleryInputRef = useRef(null);
+
+      useEffect(() => {
+        const savedUrl = localStorage.getItem('gasUrl');
+        if (savedUrl) { setGasUrl(savedUrl); setTempUrl(savedUrl); } 
+        else { setShowSettings(true); }
+        
+        const savedNickname = localStorage.getItem('userNickname');
+        const savedAge = localStorage.getItem('userAge');
+        const savedGender = localStorage.getItem('userGender');
+        const savedHeight = localStorage.getItem('userHeight');
+        const savedWeight = localStorage.getItem('userWeight');
+        const savedMedical = localStorage.getItem('userMedical');
+
+        if (savedNickname) setNickname(savedNickname);
+        if (savedAge) setAge(savedAge);
+        if (savedGender) setGender(savedGender);
+        if (savedHeight) setHeight(savedHeight);
+        if (savedWeight) setWeight(savedWeight);
+        if (savedMedical) setMedicalConditions(savedMedical);
+      }, []);
+
+      const compressImage = (file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              let width = img.width; let height = img.height;
+              const MAX = 800;
+              if (width > height) { if (width > MAX) { height *= MAX / width; width = MAX; } } 
+              else { if (height > MAX) { width *= MAX / height; height = MAX; } }
+              canvas.width = width; canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+              resolve(canvas.toDataURL('image/jpeg', 0.8));
+            };
+            img.onerror = (err) => reject(err);
+          };
+          reader.onerror = (err) => reject(err);
+        });
+      };
+
+      const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file || !file.type.startsWith('image/')) { setError("画像を選択してください"); return; }
+        if (!gasUrl) { setShowSettings(true); alert("GASのURLを設定してください！"); return; }
+        if (weight) localStorage.setItem('userWeight', weight);
+
+        setError(""); setResult(null); setLoading(true); setShowTextInput(false);
+        try {
+          const compressedDataUrl = await compressImage(file);
+          setImagePreview(compressedDataUrl);
+          await processRequest({ image: compressedDataUrl.split(',')[1], mimeType: 'image/jpeg' });
+        } catch (err) {
+          setError("画像の読み込みに失敗しました。"); setLoading(false);
+        }
+      };
+
+      // ★ テキスト送信ハンドラ
+      const handleTextSubmit = async () => {
+        if (!textInputData.trim()) { alert("食事の内容を入力してください"); return; }
+        if (!gasUrl) { setShowSettings(true); alert("GASのURLを設定してください！"); return; }
+        if (weight) localStorage.setItem('userWeight', weight);
+
+        setError(""); setResult(null); setLoading(true); setImagePreview(null);
+        await processRequest({ textInput: textInputData });
+      };
+
+      const handleSkipMeal = async () => {
+        if (!gasUrl) { setShowSettings(true); alert("設定してください"); return; }
+        if (!window.confirm(`${selectedDate} の ${mealType} を「食事なし」として記録しますか？`)) return;
+        if (weight) localStorage.setItem('userWeight', weight);
+
+        setError(""); setResult(null); setLoading(true); setImagePreview(null); setShowTextInput(false);
+        await processRequest({ skipMeal: true });
+      };
+
+      const handleRecordWeightOnly = async () => {
+        if (!gasUrl) { setShowSettings(true); alert("設定してください"); return; }
+        if (!weight) { alert("体重を入力してください！"); return; }
+        localStorage.setItem('userWeight', weight);
+
+        setError(""); setResult(null); setLoading(true); setImagePreview(null); setShowTextInput(false);
+        await processRequest({ recordWeightOnly: true });
+      };
+
+      const processRequest = async (specificPayload) => {
+        try {
+          const payload = {
+            action: "record",
+            mealType, date: selectedDate,
+            nickname, age, gender, height, weight, medicalConditions,
+            ...specificPayload
+          };
+
+          const response = await fetch(gasUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) throw new Error("HTTPステータスエラー: " + response.status);
+          const data = await response.json();
+          if (data.status === "error") throw new Error("【GAS内部エラー】\n" + data.message);
+          
+          setResult(data.data);
+          setTextInputData(""); // 送信成功したらテキスト入力枠をリセット
+        } catch (err) {
+          setError("【詳細なエラー原因】\n" + err.message + "\n\n※通信エラーが発生しました。時間をおいてお試しください。");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const resetApp = () => {
+        setImagePreview(null); setResult(null); setError(""); setShowTextInput(false);
+        if (cameraInputRef.current) cameraInputRef.current.value = "";
+        if (galleryInputRef.current) galleryInputRef.current.value = "";
+      };
+
+      const handleSaveSettings = () => {
+        const trimmedUrl = tempUrl.trim();
+        if (!trimmedUrl) { alert("URLを入力してください！"); return; }
+        if (!trimmedUrl.endsWith('/exec')) { alert("⚠️ URLの最後が「/exec」で終わっていません！"); return; }
+        
+        localStorage.setItem('gasUrl', trimmedUrl);
+        localStorage.setItem('userNickname', nickname);
+        localStorage.setItem('userAge', age);
+        localStorage.setItem('userGender', gender);
+        localStorage.setItem('userHeight', height);
+        localStorage.setItem('userMedical', medicalConditions);
+        
+        setGasUrl(trimmedUrl);
+        alert("✅ 設定を保存しました！");
+        setShowSettings(false);
+      };
+
+      const loadHistory = async () => {
+        if (!gasUrl) { setShowSettings(true); alert("設定を完了してください"); return; }
+        setShowHistory(true); setHistoryLoading(true); setVisibleCount(10); 
+        try {
+          const response = await fetch(gasUrl); 
+          if (!response.ok) throw new Error("HTTPエラー: " + response.status);
+          const data = await response.json();
+          if (data.status === "error") throw new Error("GASエラー: " + data.message);
+          setHistoryData(data.data);
+        } catch (err) { alert("【履歴取得エラー】\n" + err.message); } 
+        finally { setHistoryLoading(false); }
+      };
+
+      const formatDate = (dateString) => {
+        const d = new Date(dateString);
+        return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`;
+      };
+
+      // 編集保存時のUI更新ハンドラ
+      const handleEditSave = (newData) => {
+        // もし履歴画面を開いていたら履歴データを更新
+        if (showHistory) {
+          setHistoryData(prev => prev.map(item => {
+            if (item.date === editingItem.date) {
+               return { ...item, ...newData, mealName: `[${item.mealName.match(/^\[(.*?)\]/)?.[1] || "食事"}] ${newData.mealName}` };
+            }
+            return item;
+          }));
+        }
+        // もしメイン画面で直近の結果を編集したなら result を更新
+        if (result && result.date === editingItem.date) {
+          setResult(prev => ({ ...prev, ...newData, mealName: newData.mealName }));
+        }
+        setEditingItem(null);
+      };
+
+      const displayedHistory = historyData.slice(0, visibleCount);
+
+      // === モーダル呼び出し ===
+      const renderEditModal = () => {
+        if (!editingItem) return null;
+        return <EditModal item={editingItem} onSave={handleEditSave} onClose={() => setEditingItem(null)} gasUrl={gasUrl} />;
+      };
+
+
+      // === 設定画面 ===
+      if (showSettings) {
+        return (
+          <div className="min-h-screen text-gray-800 font-sans sm:p-4 bg-emerald-50 flex items-center justify-center">
+            {renderEditModal()}
+            <div className="w-full max-w-md bg-white sm:rounded-2xl shadow-xl p-6 m-0 sm:m-4 max-h-screen overflow-y-auto">
+              <h2 className="text-xl font-bold text-emerald-800 mb-6 flex items-center"><Settings className="mr-2"/>アプリ・プロフィール設定</h2>
+              
+              <div className="space-y-5 mb-8">
+                <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 space-y-4">
+                  <h3 className="font-bold text-emerald-700 flex items-center"><UserIcon size={18} className="mr-2"/>基本プロフィール</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div><label className="block text-xs font-bold text-gray-600 mb-1">お名前 (呼び名)</label><input type="text" value={nickname} onChange={(e) => setNickname(e.target.value)} className="w-full border border-emerald-200 rounded-lg p-2 text-sm focus:outline-none focus:border-emerald-500" /></div>
+                    <div><label className="block text-xs font-bold text-gray-600 mb-1">年齢</label><input type="number" value={age} onChange={(e) => setAge(e.target.value)} className="w-full border border-emerald-200 rounded-lg p-2 text-sm focus:outline-none focus:border-emerald-500" /></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-600 mb-1">性別</label>
+                      <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full border border-emerald-200 rounded-lg p-2 text-sm focus:outline-none focus:border-emerald-500 bg-white"><option value="男性">男性</option><option value="女性">女性</option><option value="その他">その他</option></select>
+                    </div>
+                    <div><label className="block text-xs font-bold text-gray-600 mb-1">身長 (cm)</label><input type="number" value={height} onChange={(e) => setHeight(e.target.value)} placeholder="例: 165" className="w-full border border-emerald-200 rounded-lg p-2 text-sm focus:outline-none focus:border-emerald-500" /></div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 mb-1">持病・気をつけていること (AIに伝えます)</label>
+                    <textarea value={medicalConditions} onChange={(e) => setMedicalConditions(e.target.value)} placeholder="例: 高血圧、ダイエット中、など" className="w-full border border-emerald-200 rounded-lg p-3 text-sm h-24 focus:outline-none focus:border-emerald-500" />
+                  </div>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                  <h3 className="font-bold text-gray-700 mb-3 flex items-center"><Settings size={18} className="mr-2"/>システム設定</h3>
+                  <label className="block text-xs font-bold text-gray-600 mb-1">GAS Webアプリ URL</label>
+                  <textarea className="w-full border border-gray-300 rounded-lg p-3 text-sm h-20 focus:outline-none focus:border-gray-500" value={tempUrl} onChange={(e) => setTempUrl(e.target.value)} placeholder="https://script.google.com/macros/s/......./exec" />
+                </div>
+              </div>
+              <div className="flex space-x-3 sticky bottom-0 bg-white pt-2 pb-4">
+                <button onClick={handleSaveSettings} className="flex-1 bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 shadow-sm flex items-center justify-center"><Save className="mr-2" size={20} />保存して戻る</button>
+                {gasUrl && <button onClick={() => { setTempUrl(gasUrl); setShowSettings(false); }} className="px-4 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200">キャンセル</button>}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // === 履歴画面 ===
+      if (showHistory) {
+        return (
+          <div className="min-h-screen text-gray-800 font-sans sm:p-4 bg-emerald-50">
+            {renderEditModal()}
+            <div className="max-w-md mx-auto bg-white sm:rounded-2xl sm:shadow-xl overflow-hidden min-h-screen sm:min-h-[auto] flex flex-col">
+              <header className="bg-emerald-600 text-white p-4 shadow-md z-10 flex items-center">
+                <button onClick={() => setShowHistory(false)} className="p-2 mr-2 bg-emerald-700 rounded-full hover:bg-emerald-800 active:scale-95"><ArrowLeft size={20}/></button>
+                <h1 className="text-lg font-bold flex items-center"><HistoryIcon className="mr-2"/>記録の履歴</h1>
+              </header>
+              <main className="flex-grow p-4 overflow-y-auto bg-gray-50">
+                {historyLoading ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-emerald-600">
+                    <RefreshCw className="animate-spin mb-4" size={32} />
+                    <p className="font-bold">履歴を読み込んでいます...</p>
+                  </div>
+                ) : historyData.length === 0 ? (
+                  <p className="text-center text-gray-500 py-10">まだ記録がありません</p>
+                ) : (
+                  <div className="space-y-4 pb-6">
+                    {displayedHistory.map((item, idx) => (
+                      <div key={idx} className="bg-white rounded-xl p-4 shadow-sm border border-emerald-100 animate-fade-in relative">
+                        {/* ★ 編集ボタン */}
+                        <button onClick={() => setEditingItem(item)} className="absolute top-3 right-3 text-gray-400 hover:text-emerald-600 bg-gray-50 p-1.5 rounded-md border shadow-sm active:scale-95"><Edit size={16}/></button>
+                        
+                        <div className="flex items-start space-x-3 mb-2">
+                          {item.imageUrl ? (
+                            <img src={item.imageUrl} alt="食事" className="w-16 h-16 object-cover rounded-lg flex-shrink-0 shadow-sm border" />
+                          ) : (
+                            <div className="w-16 h-16 bg-emerald-50 flex items-center justify-center rounded-lg flex-shrink-0 text-emerald-300 border border-emerald-100">
+                              {item.mealName === "体重の記録" ? <ScaleIcon size={28} className="text-blue-400"/> : item.score === "-" ? <Coffee size={28}/> : <Utensils size={28}/>}
+                            </div>
+                          )}
+                          <div className="flex-grow pr-8">
+                            <p className="text-xs text-gray-500 mb-0.5">{formatDate(item.date)}</p>
+                            <h4 className="font-bold text-gray-800 text-sm leading-tight">{item.mealName}</h4>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center text-sm space-x-3 flex-wrap gap-y-1 bg-emerald-50/50 p-2 rounded-lg">
+                          {item.score !== "-" && <div><span className="font-bold text-emerald-600 mr-1">{item.score}点</span></div>}
+                          {item.calories > 0 && <div className="text-gray-600 text-xs">{item.calories} kcal</div>}
+                          {item.salt > 0 && <div className={`text-xs font-bold ${item.salt >= 2.0 ? 'text-red-500' : 'text-gray-600'}`}>塩分 {item.salt}g</div>}
+                          {item.weight && <div className="text-xs font-bold text-blue-600 bg-blue-50 px-2 rounded-md">体重 {item.weight}kg</div>}
+                        </div>
+                      </div>
+                    ))}
+                    {historyData.length > visibleCount && (
+                      <button onClick={() => setVisibleCount(prev => prev + 10)} className="w-full mt-4 bg-emerald-100 text-emerald-700 font-bold py-3 rounded-xl flex items-center justify-center hover:bg-emerald-200 transition-colors shadow-sm active:scale-95">
+                        <ChevronDown className="mr-2" size={20} />さらに10件表示する
+                      </button>
+                    )}
+                  </div>
+                )}
+              </main>
+            </div>
+          </div>
+        );
+      }
+
+      // === メイン画面 ===
+      return (
+        <div className="min-h-screen text-gray-800 font-sans sm:p-4 bg-emerald-50">
+          {renderEditModal()}
+          <div className="max-w-md mx-auto bg-white sm:rounded-2xl sm:shadow-xl overflow-hidden min-h-screen sm:min-h-[auto] flex flex-col">
+            <header className="bg-emerald-600 text-white p-4 shadow-md z-10 flex items-center justify-between">
+              <div className="flex items-center">
+                <img src="https://images.unsplash.com/photo-1490818321205-1c702fc526e6?auto=format&fit=crop&w=150&q=80" alt="Icon" className="w-12 h-12 rounded-full border-2 border-emerald-200 object-cover mr-3 shadow-sm" />
+                <div><h1 className="text-md font-bold">健康食事アドバイザー</h1><p className="text-[10px] text-emerald-100 mt-1">あなた専用のAI管理栄養士</p></div>
+              </div>
+              <button onClick={() => setShowSettings(true)} className="p-2 bg-emerald-700 rounded-full hover:bg-emerald-800"><Settings size={20} /></button>
+            </header>
+
+            <main className="flex-grow p-5 flex flex-col space-y-6">
+              {!result && !loading && (
+                <div className="flex-grow flex flex-col items-center">
+                  
+                  {/* カレンダー＆体重 */}
+                  <div className="w-full bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-2">
+                    <p className="text-sm font-bold text-blue-800 mb-3 flex items-center justify-center"><Calendar className="mr-2" size={18}/>記録する日付 と 今日の体重</p>
+                    <div className="flex space-x-3 mb-2">
+                      <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="flex-1 bg-white border-2 border-blue-200 rounded-xl px-3 py-2 text-blue-800 font-bold focus:outline-none focus:border-blue-500 shadow-sm" />
+                      <div className="flex-1 relative">
+                        <input type="number" step="0.1" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="体重" className="w-full bg-white border-2 border-blue-200 rounded-xl px-3 py-2 text-blue-800 font-bold focus:outline-none focus:border-blue-500 shadow-sm pr-8" />
+                        <span className="absolute right-3 top-2.5 text-blue-400 font-bold text-sm pointer-events-none">kg</span>
+                      </div>
+                    </div>
+                    <button onClick={handleRecordWeightOnly} className="w-full mt-2 bg-blue-500 text-white font-bold py-2 rounded-xl flex items-center justify-center hover:bg-blue-600 transition-colors shadow-sm active:scale-95 text-sm">
+                      <ScaleIcon className="mr-2" size={18} />体重だけを記録する
+                    </button>
+                  </div>
+
+                  {/* タイミング選択 */}
+                  <div className="mb-4 w-full text-center">
+                    <div className="flex justify-center space-x-2">
+                      {['朝ご飯', '昼ご飯', '夜ご飯', '間食'].map(type => (
+                        <button key={type} onClick={() => setMealType(type)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${mealType === type ? 'bg-emerald-600 text-white shadow-md' : 'bg-white text-emerald-600 border border-emerald-300 hover:bg-emerald-50'}`}>{type}</button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* ★ カメラ / アルバム / テキスト入力 */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                    <button onClick={() => cameraInputRef.current?.click()} className="border-2 border-emerald-500 rounded-2xl p-4 flex flex-col items-center justify-center bg-white hover:bg-emerald-50 shadow-sm active:scale-95">
+                      <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-2 text-emerald-600"><Camera size={24} /></div><span className="font-bold text-emerald-700 text-sm">カメラで撮影</span>
+                    </button>
+                    <input type="file" accept="image/*" capture="environment" className="hidden" ref={cameraInputRef} onChange={handleImageUpload} />
+
+                    <button onClick={() => galleryInputRef.current?.click()} className="border-2 border-emerald-500 rounded-2xl p-4 flex flex-col items-center justify-center bg-white hover:bg-emerald-50 shadow-sm active:scale-95">
+                      <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-2 text-emerald-600"><ImageIcon size={24} /></div><span className="font-bold text-emerald-700 text-sm">アルバムから選ぶ</span>
+                    </button>
+                    <input type="file" accept="image/*" className="hidden" ref={galleryInputRef} onChange={handleImageUpload} />
+                  </div>
+
+                  {/* ★ 手動テキスト入力ボタン */}
+                  <div className="w-full mt-3">
+                    <button onClick={() => setShowTextInput(!showTextInput)} className={`w-full border-2 ${showTextInput ? 'border-orange-400 bg-orange-50 text-orange-700' : 'border-emerald-300 bg-white text-emerald-600'} font-bold py-3 rounded-xl flex items-center justify-center transition-colors shadow-sm active:scale-95`}>
+                      <FileText className="mr-2" size={20} />{showTextInput ? 'テキスト入力を閉じる' : '📝 写真なしでテキスト入力する'}
+                    </button>
+                  </div>
+                  
+                  {/* ★ テキスト入力エリア */}
+                  {showTextInput && (
+                    <div className="w-full mt-3 p-4 bg-orange-50 border border-orange-200 rounded-xl animate-fade-in shadow-inner">
+                      <p className="text-xs font-bold text-orange-800 mb-2">食事の内容を入力（AIが自動でカロリー等を推測します）</p>
+                      <textarea 
+                        value={textInputData} 
+                        onChange={(e) => setTextInputData(e.target.value)} 
+                        placeholder="例：ご飯お茶碗1杯、鮭の塩焼き、ほうれん草のお浸し（醤油なし）" 
+                        className="w-full border border-orange-300 rounded-lg p-3 text-sm h-24 focus:outline-none focus:border-orange-500 mb-3"
+                      />
+                      <button onClick={handleTextSubmit} className="w-full bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 shadow-sm active:scale-95 flex justify-center items-center">
+                        <Activity className="mr-2" size={18}/> AIに解析・記録してもらう
+                      </button>
+                      <p className="text-[10px] text-gray-500 mt-2 text-center">※記録した後に、カロリー等を自分で編集することもできます</p>
+                    </div>
+                  )}
+
+                  <div className="w-full mt-4">
+                    <button onClick={handleSkipMeal} className="w-full bg-white border-2 border-gray-300 text-gray-500 font-bold py-3 rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors shadow-sm active:scale-95">
+                      <Coffee className="mr-2" size={20} />この食事は摂らなかった（記録のみ）
+                    </button>
+                  </div>
+
+                  <div className="w-full mt-8">
+                    <button onClick={loadHistory} className="w-full bg-emerald-50 border-2 border-emerald-200 text-emerald-700 font-bold py-4 rounded-xl flex items-center justify-center hover:bg-emerald-100 transition-colors shadow-sm active:scale-95">
+                      <HistoryIcon className="mr-2" size={20} />過去の記録を見る
+                    </button>
+                  </div>
+
+                  <div className="mt-8 bg-emerald-50 rounded-xl p-4 w-full shadow-sm border border-emerald-200">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="flex items-center text-emerald-800 font-bold"><Info size={18} className="mr-1"/> あなたの登録情報</h3>
+                      <button onClick={() => setShowSettings(true)} className="text-xs bg-emerald-200 text-emerald-800 px-2 py-1 rounded hover:bg-emerald-300 font-bold">編集</button>
+                    </div>
+                    <ul className="text-sm text-emerald-900 space-y-1 ml-1">
+                      <li>• {age}歳 {gender} ({nickname} さん)</li>
+                      <li>• 身長: {height ? `${height} cm` : "未設定"} / 体重: {weight ? `${weight} kg` : "未記録"}</li>
+                      <li className="break-words">• 気をつけていること: {medicalConditions}</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {loading && (
+                <div className="flex-grow flex flex-col items-center justify-center py-12">
+                  <div className="relative w-24 h-24 mb-4"><div className="absolute inset-0 border-4 border-emerald-100 rounded-full"></div><div className="absolute inset-0 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin"></div><div className="absolute inset-0 m-auto text-emerald-500 flex items-center justify-center"><Utensils size={32} /></div></div>
+                  <p className="text-lg font-bold text-emerald-700 animate-pulse">AIが解析中...</p>
+                </div>
+              )}
+
+              {error && (<div className="bg-red-50 text-red-700 p-4 rounded-xl flex items-start shadow-sm border border-red-200"><AlertCircle className="mr-2 flex-shrink-0 mt-0.5" /><p className="text-sm whitespace-pre-wrap">{error}</p></div>)}
+
+              {/* ★ 解析結果画面 */}
+              {result && !loading && (
+                <div className="animate-fade-in space-y-5">
+                  <div className="bg-emerald-100 text-emerald-800 text-sm font-bold p-3 rounded-lg flex items-center justify-between border border-emerald-200">
+                    <div className="flex items-center"><CheckCircle className="mr-2" size={18} />自動記録されました</div>
+                    {/* ★ 記録直後の編集ボタン */}
+                    <button onClick={() => setEditingItem(result)} className="bg-white text-emerald-700 border border-emerald-300 px-3 py-1 rounded-md text-xs hover:bg-emerald-50 shadow-sm flex items-center active:scale-95"><Edit size={14} className="mr-1"/>内容を修正</button>
+                  </div>
+                  
+                  {imagePreview ? (
+                    <div className="relative h-40 w-full rounded-xl overflow-hidden shadow-md">
+                      <img src={imagePreview} alt="Meal" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-3"><h2 className="text-white font-bold text-lg flex items-center"><Utensils size={18} className="mr-2"/>{result.mealName}</h2></div>
+                    </div>
+                  ) : (
+                    <div className="relative h-20 w-full bg-emerald-100 rounded-xl overflow-hidden shadow-md flex items-center justify-center">
+                      <h2 className="text-emerald-800 font-bold text-lg flex items-center">
+                        {result.mealName === "体重の記録" ? <ScaleIcon size={24} className="mr-2 text-blue-500"/> : <FileText size={24} className="mr-2 text-orange-500"/>}
+                        {result.mealName}
+                      </h2>
+                    </div>
+                  )}
+                  
+                  {result.mealName !== "体重の記録" && (
+                    <div className={`rounded-xl p-5 border shadow-sm ${result.totalSaltTargetDate >= 6.0 ? 'bg-red-50 border-red-300' : 'bg-white border-emerald-100'}`}>
+                      <h3 className={`text-md font-bold mb-3 flex items-center ${result.totalSaltTargetDate >= 6.0 ? 'text-red-700' : 'text-emerald-800'}`}>
+                        {result.totalSaltTargetDate >= 6.0 ? <AlertCircle className="mr-2" size={20}/> : <Activity className="mr-2" size={20}/>}
+                        対象日の塩分摂取量
+                      </h3>
+                      <div className="mb-2 flex justify-between text-sm">
+                        <span className={`font-bold ${result.totalSaltTargetDate >= 6.0 ? 'text-red-700 text-lg' : 'text-gray-700'}`}>合計: {result.totalSaltTargetDate.toFixed(1)} g</span>
+                        <span className="text-gray-500 self-end">目標: 6.0g未満</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-3 mb-3 overflow-hidden">
+                        <div className={`h-3 rounded-full transition-all duration-1000 ${result.totalSaltTargetDate >= 6.0 ? 'bg-red-500' : result.totalSaltTargetDate >= 4.0 ? 'bg-yellow-400' : 'bg-emerald-500'}`} style={{ width: `${Math.min((result.totalSaltTargetDate / 6.0) * 100, 100)}%` }}></div>
+                      </div>
+                      {result.totalSaltTargetDate >= 6.0 && (
+                        <div className="mt-3 p-3 bg-white/70 border border-red-200 rounded-lg">
+                          <p className="text-sm text-red-600 font-bold leading-relaxed flex items-start"><span className="mr-1">⚠️</span> <span>1日の塩分目安をオーバーしています！次の食事や明日は塩分を控えめにしましょう。</span></p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {result.mealName !== "体重の記録" && (
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="bg-white rounded-xl shadow-sm border border-emerald-100 p-3 flex flex-col items-center justify-center"><span className="text-gray-500 text-xs font-medium mb-1">健康スコア</span><div className="flex items-baseline"><span className={`text-2xl font-extrabold ${result.score === '-' ? 'text-gray-400' : result.score >= 80 ? 'text-emerald-500' : result.score >= 60 ? 'text-yellow-500' : 'text-red-500'}`}>{result.score}</span>{result.score !== '-' && <span className="text-gray-500 ml-1 text-xs font-bold">点</span>}</div></div>
+                      <div className="bg-white rounded-xl shadow-sm border border-emerald-100 p-3 flex flex-col items-center justify-center"><span className="text-gray-500 text-xs font-medium mb-1">推定カロリー</span><div className="flex items-baseline"><span className="text-2xl font-extrabold text-gray-800">{result.calories}</span><span className="text-gray-500 ml-1 text-xs font-bold">kcal</span></div></div>
+                      <div className="bg-white rounded-xl shadow-sm border border-emerald-100 p-3 flex flex-col items-center justify-center"><span className="text-gray-500 text-xs font-medium mb-1">今回の塩分</span><div className="flex items-baseline"><span className={`text-2xl font-extrabold ${result.salt >= 2.5 ? 'text-red-600' : 'text-gray-800'}`}>{result.salt}</span><span className="text-gray-500 ml-1 text-xs font-bold">g</span></div></div>
+                    </div>
+                  )}
+
+                  {result.score !== '-' && (
+                    <div className="bg-white rounded-xl shadow-sm border border-emerald-100 p-5"><h3 className="text-md font-bold text-gray-700 mb-4 flex items-center border-b pb-2"><Activity className="mr-2 text-emerald-500" size={20}/>栄養バランス (PFC)</h3><PFCDonutChart protein={result.protein} fat={result.fat} carbs={result.carbs} /></div>
+                  )}
+                  
+                  {result.missingNutrients && result.missingNutrients.length > 0 && (
+                    <div className="bg-orange-50 rounded-xl p-5 border border-orange-100 shadow-sm"><h3 className="text-md font-bold text-orange-800 mb-3 flex items-center"><AlertCircle className="mr-2" size={20}/>補いたい栄養素</h3><ul className="space-y-2">{result.missingNutrients.map((nut, idx) => (<li key={idx} className="flex items-start text-orange-900 bg-white/60 p-2 rounded-lg text-sm font-medium"><CheckCircle className="mr-2 text-orange-500 flex-shrink-0 mt-0.5" size={16} />{nut}</li>))}</ul></div>
+                  )}
+
+                  <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-5 border border-emerald-200 shadow-sm relative overflow-hidden"><h3 className="text-md font-bold text-emerald-800 mb-3 flex items-center relative z-10"><Heart className="mr-2 text-emerald-600" size={20}/>{nickname}さんへ</h3><p className="text-gray-800 leading-relaxed text-[15px] whitespace-pre-wrap relative z-10 font-medium">{result.advice}</p></div>
+                  
+                  <button onClick={resetApp} className="w-full mt-4 bg-white border-2 border-emerald-500 text-emerald-600 font-bold py-4 rounded-xl flex items-center justify-center hover:bg-emerald-50 active:scale-95"><RefreshCw className="mr-2" size={20} />トップに戻る</button>
+                  <button onClick={loadHistory} className="w-full mt-2 bg-emerald-50 border-2 border-emerald-200 text-emerald-700 font-bold py-4 rounded-xl flex items-center justify-center hover:bg-emerald-100 active:scale-95"><HistoryIcon className="mr-2" size={20} />過去の記録を見る</button>
+                </div>
+              )}
+            </main>
+          </div>
+        </div>
+      );
+    }
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
+
+
