@@ -7,14 +7,15 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone@7.24.4/babel.min.js"></script>
+  <!-- ★ バグを防ぐため、安定して動くバージョンのBabelに固定しました -->
+  <script src="https://unpkg.com/@babel/standalone@7.23.6/babel.min.js"></script>
 </head>
 <body class="bg-emerald-50">
   <div id="root"></div>
-  <script type="text/babel" data-type="module">
+  <!-- ★ 確実にReactコードとして翻訳されるよう安全な設定を追加しました -->
+  <script type="text/babel" data-presets="react,env">
     const { useState, useRef, useEffect } = React;
 
-    // --- アイコン群 ---
     const Camera = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>);
     const ImageIcon = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>);
     const Activity = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>);
@@ -70,7 +71,6 @@
       );
     };
 
-    // ★ 編集モーダルコンポーネント
     const EditModal = ({ item, onSave, onClose, gasUrl }) => {
       const [formData, setFormData] = useState({
         mealName: item.mealName ? item.mealName.replace(/^\[.*?\]\s*/, '') : "",
@@ -106,7 +106,6 @@
           const data = await response.json();
           if (data.status === "error") throw new Error(data.message);
           
-          // 親コンポーネントに保存完了を通知
           onSave(formData);
         } catch (err) {
           alert("保存に失敗しました: " + err.message);
@@ -227,43 +226,146 @@
         if (savedMedical) setMedicalConditions(savedMedical);
       }, []);
 
+      const createImageFingerprint = (sourceCanvas) => {
+        const size = 8;
+        const tinyCanvas = document.createElement('canvas');
+        tinyCanvas.width = size;
+        tinyCanvas.height = size;
+        const tinyCtx = tinyCanvas.getContext('2d', { willReadFrequently: true });
+        if (!tinyCtx) return "";
+
+        tinyCtx.drawImage(sourceCanvas, 0, 0, size, size);
+        const pixels = tinyCtx.getImageData(0, 0, size, size).data;
+        const grayValues = [];
+        let total = 0;
+
+        for (let i = 0; i < pixels.length; i += 4) {
+          const gray = Math.round((pixels[i] * 0.299) + (pixels[i + 1] * 0.587) + (pixels[i + 2] * 0.114));
+          grayValues.push(gray);
+          total += gray;
+        }
+
+        const average = total / grayValues.length;
+        let bits = "";
+        grayValues.forEach(value => { bits += value >= average ? "1" : "0"; });
+
+        let hex = "";
+        for (let i = 0; i < bits.length; i += 4) {
+          hex += parseInt(bits.slice(i, i + 4), 2).toString(16);
+        }
+        return hex;
+      };
+
       const compressImage = (file) => {
         return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = (event) => {
-            const img = new Image();
-            img.src = event.target.result;
-            img.onload = () => {
-              const canvas = document.createElement('canvas');
-              let width = img.width; let height = img.height;
-              const MAX = 800;
-              if (width > height) { if (width > MAX) { height *= MAX / width; width = MAX; } } 
-              else { if (height > MAX) { width *= MAX / height; height = MAX; } }
-              canvas.width = width; canvas.height = height;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(img, 0, 0, width, height);
-              resolve(canvas.toDataURL('image/jpeg', 0.8));
-            };
-            img.onerror = (err) => reject(err);
+          if (!file) {
+            reject(new Error("画像が選択されていません。"));
+            return;
+          }
+          if (file.size > 30 * 1024 * 1024) {
+            reject(new Error("画像が大きすぎます。30MB以下の画像を選択してください。"));
+            return;
+          }
+
+          const objectUrl = URL.createObjectURL(file);
+          const img = new Image();
+          let finished = false;
+
+          const cleanup = () => {
+            if (!finished) {
+              finished = true;
+              URL.revokeObjectURL(objectUrl);
+            }
           };
-          reader.onerror = (err) => reject(err);
+
+          img.onload = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              let width = img.naturalWidth || img.width;
+              let height = img.naturalHeight || img.height;
+              const MAX_SIDE = 900;
+
+              if (!width || !height) {
+                throw new Error("画像の大きさを読み取れませんでした。");
+              }
+
+              const scale = Math.min(1, MAX_SIDE / Math.max(width, height));
+              width = Math.max(1, Math.round(width * scale));
+              height = Math.max(1, Math.round(height * scale));
+              canvas.width = width;
+              canvas.height = height;
+
+              const ctx = canvas.getContext('2d', { alpha: false });
+              if (!ctx) throw new Error("画像処理を開始できませんでした。");
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, width, height);
+              ctx.drawImage(img, 0, 0, width, height);
+
+              const dataUrl = canvas.toDataURL('image/jpeg', 0.74);
+              if (!dataUrl || dataUrl === 'data:,') {
+                throw new Error("画像の圧縮に失敗しました。");
+              }
+              const fingerprint = createImageFingerprint(canvas);
+              cleanup();
+              resolve({ dataUrl, fingerprint });
+            } catch (error) {
+              cleanup();
+              reject(error);
+            }
+          };
+
+          img.onerror = () => {
+            cleanup();
+            const type = (file.type || '').toLowerCase();
+            if (type.includes('heic') || type.includes('heif')) {
+              reject(new Error("HEIC画像をこのブラウザで読み込めません。カメラ設定をJPEGにするか、スクリーンショットを選択してください。"));
+            } else {
+              reject(new Error("画像ファイルを読み込めませんでした。別の画像でお試しください。"));
+            }
+          };
+
+          img.src = objectUrl;
         });
       };
 
       const handleImageUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file || !file.type.startsWith('image/')) { setError("画像を選択してください"); return; }
-        if (!gasUrl) { setShowSettings(true); alert("GASのURLを設定してください！"); return; }
+        const input = e.currentTarget;
+        const file = input.files && input.files[0];
+
+        if (!file || !file.type.startsWith('image/')) {
+          setError("画像を選択してください。");
+          input.value = "";
+          return;
+        }
+        if (!gasUrl) {
+          setShowSettings(true);
+          alert("GASのURLを設定してください！");
+          input.value = "";
+          return;
+        }
         if (weight) localStorage.setItem('userWeight', weight);
 
-        setError(""); setResult(null); setLoading(true); setShowTextInput(false);
+        setError("");
+        setResult(null);
+        setLoading(true);
+        setShowTextInput(false);
+
         try {
-          const compressedDataUrl = await compressImage(file);
+          const compressedImage = await compressImage(file);
+          const compressedDataUrl = compressedImage.dataUrl;
           setImagePreview(compressedDataUrl);
-          await processRequest({ image: compressedDataUrl.split(',')[1], mimeType: 'image/jpeg' });
+          await processRequest({
+            image: compressedDataUrl.substring(compressedDataUrl.indexOf(',') + 1),
+            mimeType: 'image/jpeg',
+            imageFingerprint: compressedImage.fingerprint
+          });
         } catch (err) {
-          setError("画像の読み込みに失敗しました。"); setLoading(false);
+          setError("【画像読み込みエラー】\n" + (err?.message || "画像の読み込みに失敗しました。"));
+          setImagePreview(null);
+          setLoading(false);
+        } finally {
+          // 同じ画像をもう一度選び直せるようにリセット
+          input.value = "";
         }
       };
 
@@ -295,29 +397,70 @@
       };
 
       const processRequest = async (specificPayload) => {
-        try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 150000);
+
+        const sendRequest = async (forceDuplicate = false) => {
           const payload = {
             action: "record",
             mealType, date: selectedDate,
             nickname, age, gender, height, weight, medicalConditions,
-            ...specificPayload
+            ...specificPayload,
+            forceDuplicate
           };
 
           const response = await fetch(gasUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload)
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload),
+            signal: controller.signal,
+            cache: 'no-store'
           });
 
-          if (!response.ok) throw new Error("HTTPステータスエラー: " + response.status);
-          const data = await response.json();
-          if (data.status === "error") throw new Error("【GAS内部エラー】\n" + data.message);
-          
+          const responseText = await response.text();
+          if (!response.ok) {
+            throw new Error("HTTPステータスエラー: " + response.status);
+          }
+
+          try {
+            return JSON.parse(responseText);
+          } catch (parseError) {
+            throw new Error("GASからJSON以外の応答が返りました。新しいデプロイが反映されているか確認してください。");
+          }
+        };
+
+        try {
+          let data = await sendRequest(false);
+
+          if (data.status === "duplicate") {
+            const shouldRegister = window.confirm(
+              data.message || "同じ内容が既に登録されています。重複して登録しますか？"
+            );
+
+            if (!shouldRegister) {
+              if (specificPayload.image) setImagePreview(null);
+              return;
+            }
+
+            data = await sendRequest(true);
+          }
+
+          if (data.status === "error") {
+            throw new Error("【GAS内部エラー】\n" + (data.message || "原因不明のエラー"));
+          }
+          if (!data.data) {
+            throw new Error("解析結果が返りませんでした。");
+          }
+
           setResult(data.data);
-          setTextInputData(""); 
+          setTextInputData("");
         } catch (err) {
-          setError("【詳細なエラー原因】\n" + err.message + "\n\n※通信エラーが発生しました。時間をおいてお試しください。");
+          const message = err?.name === 'AbortError'
+            ? "解析に時間がかかりすぎたため中断しました。通信状態を確認して、もう一度お試しください。"
+            : (err?.message || "通信エラーが発生しました。");
+          setError("【詳細なエラー原因】\n" + message);
         } finally {
+          clearTimeout(timeoutId);
           setLoading(false);
         }
       };
@@ -454,7 +597,7 @@
                         
                         <div className="flex items-start space-x-3 mb-2">
                           {item.imageUrl ? (
-                            <img src={item.imageUrl} alt="食事" className="w-16 h-16 object-cover rounded-lg flex-shrink-0 shadow-sm border" />
+                            <img src={item.imageUrl} alt="食事" onError={(e) => { e.currentTarget.style.display = 'none'; }} className="w-16 h-16 object-cover rounded-lg flex-shrink-0 shadow-sm border" />
                           ) : (
                             <div className="w-16 h-16 bg-emerald-50 flex items-center justify-center rounded-lg flex-shrink-0 text-emerald-300 border border-emerald-100">
                               {item.mealName === "体重の記録" ? <ScaleIcon size={28} className="text-blue-400"/> : item.score === "-" ? <Coffee size={28}/> : <Utensils size={28}/>}
@@ -541,6 +684,11 @@
                     <input type="file" accept="image/*" className="hidden" ref={galleryInputRef} onChange={handleImageUpload} />
                   </div>
 
+                  <div className="w-full mt-3 bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-800 leading-relaxed">
+                    🔒 食事画像はGoogle Driveへ保存せず、端末内で縮小してAI解析にだけ使用します。ストレージ容量が満杯でも画像解析できます。<br/>
+                    ⚠️ 同じ日付に同じ画像や同じ入力内容を再登録すると、保存前に確認が表示されます。
+                  </div>
+
                   {/* ★ 手動テキスト入力ボタン */}
                   <div className="w-full mt-3">
                     <button onClick={() => setShowTextInput(!showTextInput)} className={`w-full border-2 ${showTextInput ? 'border-orange-400 bg-orange-50 text-orange-700' : 'border-emerald-300 bg-white text-emerald-600'} font-bold py-3 rounded-xl flex items-center justify-center transition-colors shadow-sm active:scale-95`}>
@@ -594,7 +742,7 @@
               {loading && (
                 <div className="flex-grow flex flex-col items-center justify-center py-12">
                   <div className="relative w-24 h-24 mb-4"><div className="absolute inset-0 border-4 border-emerald-100 rounded-full"></div><div className="absolute inset-0 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin"></div><div className="absolute inset-0 m-auto text-emerald-500 flex items-center justify-center"><Utensils size={32} /></div></div>
-                  <p className="text-lg font-bold text-emerald-700 animate-pulse">AIが解析中...</p>
+                  <p className="text-lg font-bold text-emerald-700 animate-pulse">AIが画像を解析中...</p><p className="text-xs text-gray-500 mt-2">画像は保存せず、その場で解析しています</p>
                 </div>
               )}
 
@@ -676,4 +824,3 @@
   </script>
 </body>
 </html>
-
