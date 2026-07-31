@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>毎日の健康食事アドバイザー</title>
+  <title>毎日の健康食事アドバイザー v1.2.1</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -638,7 +638,7 @@
             <header className="bg-emerald-600 text-white p-4 shadow-md z-10 flex items-center justify-between">
               <div className="flex items-center">
                 <img src="https://images.unsplash.com/photo-1490818321205-1c702fc526e6?auto=format&fit=crop&w=150&q=80" alt="Icon" className="w-12 h-12 rounded-full border-2 border-emerald-200 object-cover mr-3 shadow-sm" />
-                <div><h1 className="text-md font-bold">健康食事アドバイザー</h1><p className="text-[10px] text-emerald-100 mt-1">あなた専用のAI管理栄養士</p></div>
+                <div><h1 className="text-md font-bold">健康食事アドバイザー</h1><p className="text-[10px] text-emerald-100 mt-1">あなた専用のAI管理栄養士 <span className="opacity-70">v1.2.1</span></p></div>
               </div>
               <button onClick={() => setShowSettings(true)} className="p-2 bg-emerald-700 rounded-full hover:bg-emerald-800"><Settings size={20} /></button>
             </header>
@@ -671,17 +671,34 @@
                     </div>
                   </div>
 
-                  {/* ★ カメラ / アルバム / テキスト入力 */}
+                  {/* ★ カメラ / アルバム：入力欄をボタン全面に重ね、端末の画像選択を直接開く */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                    <button onClick={() => cameraInputRef.current?.click()} className="border-2 border-emerald-500 rounded-2xl p-4 flex flex-col items-center justify-center bg-white hover:bg-emerald-50 shadow-sm active:scale-95">
-                      <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-2 text-emerald-600"><Camera size={24} /></div><span className="font-bold text-emerald-700 text-sm">カメラで撮影</span>
-                    </button>
-                    <input type="file" accept="image/*" capture="environment" className="hidden" ref={cameraInputRef} onChange={handleImageUpload} />
+                    <div className="relative border-2 border-emerald-500 rounded-2xl p-4 flex flex-col items-center justify-center bg-white hover:bg-emerald-50 shadow-sm active:scale-95 min-h-[112px] overflow-hidden">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        aria-label="カメラで食事を撮影"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                        onClick={(e) => { e.currentTarget.value = ''; }}
+                        onChange={handleImageUpload}
+                      />
+                      <div className="pointer-events-none w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-2 text-emerald-600"><Camera size={24} /></div>
+                      <span className="pointer-events-none font-bold text-emerald-700 text-sm">カメラで撮影</span>
+                    </div>
 
-                    <button onClick={() => galleryInputRef.current?.click()} className="border-2 border-emerald-500 rounded-2xl p-4 flex flex-col items-center justify-center bg-white hover:bg-emerald-50 shadow-sm active:scale-95">
-                      <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-2 text-emerald-600"><ImageIcon size={24} /></div><span className="font-bold text-emerald-700 text-sm">アルバムから選ぶ</span>
-                    </button>
-                    <input type="file" accept="image/*" className="hidden" ref={galleryInputRef} onChange={handleImageUpload} />
+                    <div className="relative border-2 border-emerald-500 rounded-2xl p-4 flex flex-col items-center justify-center bg-white hover:bg-emerald-50 shadow-sm active:scale-95 min-h-[112px] overflow-hidden">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        aria-label="アルバムから食事画像を選ぶ"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                        onClick={(e) => { e.currentTarget.value = ''; }}
+                        onChange={handleImageUpload}
+                      />
+                      <div className="pointer-events-none w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-2 text-emerald-600"><ImageIcon size={24} /></div>
+                      <span className="pointer-events-none font-bold text-emerald-700 text-sm">アルバムから選ぶ</span>
+                    </div>
                   </div>
 
                   <div className="w-full mt-3 bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-800 leading-relaxed">
