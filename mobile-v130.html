@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>健康食事アドバイザー v1.3.0</title>
+  <style>
+    :root{--green:#059669;--green2:#047857;--pale:#ecfdf5;--blue:#2563eb;--orange:#ea580c;--red:#dc2626;--ink:#1f2937;--muted:#6b7280;--line:#d1d5db}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;background:#ecfdf5;color:var(--ink);-webkit-text-size-adjust:100%}
+    button,input,textarea,select{font:inherit;font-size:16px}
+    button{touch-action:manipulation;cursor:pointer}
+    .app{width:100%;max-width:480px;min-height:100vh;margin:0 auto;background:#fff;box-shadow:0 0 24px rgba(0,0,0,.08)}
+    header{position:sticky;top:0;z-index:10;background:var(--green);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.14)}
+    .title{font-weight:800;font-size:17px}.version{font-size:11px;opacity:.85;margin-top:2px}.header-btn{border:0;background:#047857;color:#fff;border-radius:999px;width:42px;height:42px}
+    main{padding:16px}.card{border:1px solid #dbeafe;background:#eff6ff;border-radius:16px;padding:14px;margin-bottom:14px}.card.green{background:#f0fdf4;border-color:#bbf7d0}.card.orange{background:#fff7ed;border-color:#fed7aa}.card.gray{background:#f9fafb;border-color:#e5e7eb}
+    h2,h3,p{margin-top:0}.section-title{text-align:center;font-weight:800;color:#1e40af;margin-bottom:10px}.row{display:flex;gap:10px}.row>*{min-width:0;flex:1}
+    input[type="date"],input[type="number"],input[type="text"],textarea,select{width:100%;border:2px solid #bfdbfe;border-radius:12px;padding:11px 12px;background:#fff;color:#1e3a8a;outline:none}
+    textarea{min-height:100px;resize:vertical;color:var(--ink);border-color:#d1d5db}
+    input:focus,textarea:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+    .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:13px;padding:13px 12px;font-weight:800;color:#fff;background:var(--green);margin-top:10px;min-height:48px}
+    .btn:active{transform:scale(.985)}.btn.blue{background:var(--blue)}.btn.orange{background:var(--orange)}.btn.light{background:#fff;color:var(--green2);border:2px solid #a7f3d0}.btn.gray{background:#fff;color:#4b5563;border:2px solid #d1d5db}.btn.red{background:#fff;color:var(--red);border:2px solid #fecaca}.btn.small{width:auto;min-height:38px;padding:8px 12px;margin:0;font-size:14px}
+    .meal-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:12px 0}.meal-tab{border:1px solid #6ee7b7;border-radius:999px;padding:10px 4px;background:#fff;color:var(--green2);font-weight:800;font-size:14px}.meal-tab.active{background:var(--green);color:#fff;border-color:var(--green)}
+    .native-upload{display:grid;grid-template-columns:1fr;gap:12px;margin-top:8px}.upload-box{border:2px solid #34d399;border-radius:16px;padding:14px;background:#fff}.upload-title{font-weight:800;color:var(--green2);margin-bottom:8px}.upload-help{font-size:12px;color:var(--muted);margin:7px 0 0}
+    input[type="file"]{display:block;width:100%;max-width:100%;font-size:16px;color:#374151;background:#fff;border:1px solid #a7f3d0;border-radius:10px;padding:6px}
+    input[type="file"]::file-selector-button{border:0;border-radius:8px;background:var(--green);color:#fff;padding:10px 12px;margin-right:9px;font-weight:800}
+    .notice{font-size:13px;line-height:1.65;color:#1e40af;background:#eff6ff;border:1px solid #bfdbfe;border-radius:13px;padding:11px;margin:12px 0}
+    .hidden{display:none!important}.error{white-space:pre-wrap;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:13px;padding:13px;margin:12px 0;font-weight:700}.success{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:13px;padding:12px;margin:12px 0}
+    .result-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.result-title{font-weight:900;font-size:20px;color:#065f46}.preview{width:100%;max-height:280px;object-fit:cover;border-radius:14px;border:1px solid #d1fae5;margin-bottom:12px}
+    .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.stat{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:10px}.stat b{display:block;font-size:18px;margin-top:3px}.advice{white-space:pre-wrap;line-height:1.75;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:14px;margin-top:12px}.missing{background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:12px;margin-top:10px}
+    .history-item{position:relative;background:#fff;border:1px solid #d1fae5;border-radius:14px;padding:13px;margin-bottom:10px;box-shadow:0 2px 7px rgba(0,0,0,.04)}.history-title{font-weight:800;padding-right:62px}.history-date{font-size:12px;color:var(--muted);margin-bottom:5px}.history-meta{font-size:13px;color:#374151;margin-top:7px;display:flex;gap:9px;flex-wrap:wrap}.edit-history{position:absolute;right:9px;top:9px;border:1px solid #d1d5db;background:#f9fafb;border-radius:8px;padding:6px 9px;color:#374151;font-weight:700}
+    .overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}.panel{width:100%;max-width:440px;max-height:92vh;overflow:auto;background:#fff;border-radius:18px;padding:18px}.panel h2{color:#065f46}.form-group{margin-bottom:13px}.form-group label{display:block;font-size:13px;font-weight:800;color:#4b5563;margin-bottom:5px}.panel-actions{display:flex;gap:9px;position:sticky;bottom:0;background:#fff;padding-top:10px}
+    .busy{position:fixed;inset:0;z-index:200;background:rgba(255,255,255,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}.spinner{width:56px;height:56px;border:6px solid #d1fae5;border-top-color:var(--green);border-radius:50%;animation:spin .9s linear infinite;margin-bottom:16px}@keyframes spin{to{transform:rotate(360deg)}}
+    .backbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}.backbar h2{margin:0;color:#065f46}.back{width:auto;border:0;border-radius:999px;background:#d1fae5;color:#065f46;padding:9px 12px;font-weight:800}
+    .tap-test{font-size:11px;color:#047857;text-align:center;margin-top:5px}
+    @media(min-width:600px){.app{margin:16px auto;min-height:calc(100vh - 32px);border-radius:20px;overflow:hidden}.native-upload{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div><div class="title">🥗 健康食事アドバイザー</div><div class="version">スマホ完全対応版 v1.3.0（外部ライブラリ不使用）</div></div>
+    <button id="openSettings" class="header-btn" type="button" aria-label="設定">⚙️</button>
+  </header>
+
+  <main>
+    <div id="homeView">
+      <div class="card">
+        <div class="section-title">📅 記録する日付 と 今日の体重</div>
+        <div class="row">
+          <input id="recordDate" type="date">
+          <input id="weight" type="number" inputmode="decimal" step="0.1" placeholder="体重 kg">
+        </div>
+        <button id="recordWeight" class="btn blue" type="button">⚖️ 体重だけを記録する</button>
+        <div id="tapTest" class="tap-test">体重欄を押して数字が入力できれば、スマホ操作は正常です。</div>
+      </div>
+
+      <div class="meal-tabs" id="mealTabs">
+        <button class="meal-tab active" type="button" data-meal="朝ご飯">朝ご飯</button>
+        <button class="meal-tab" type="button" data-meal="昼ご飯">昼ご飯</button>
+        <button class="meal-tab" type="button" data-meal="夜ご飯">夜ご飯</button>
+        <button class="meal-tab" type="button" data-meal="間食">間食</button>
+      </div>
+
+      <div class="native-upload">
+        <div class="upload-box">
+          <div class="upload-title">📷 カメラで撮影</div>
+          <input id="cameraInput" type="file" accept="image/*" capture="environment">
+          <p class="upload-help">この欄は隠していないため、スマホ標準のカメラ選択が直接開きます。</p>
+        </div>
+        <div class="upload-box">
+          <div class="upload-title">🖼️ アルバムから選ぶ</div>
+          <input id="galleryInput" type="file" accept="image/*">
+          <p class="upload-help">写真・スクリーンショットを選択できます。</p>
+        </div>
+      </div>
+
+      <div class="notice">🔒 食事画像はGoogle Driveへ保存せず、端末内で縮小してAI解析にだけ使用します。<br>⚠️ 同じ日付に同じ画像・同じテキスト・同じ体重を登録すると、保存前に確認を表示します。</div>
+
+      <button id="toggleText" class="btn light" type="button">📝 写真なしでテキスト入力する</button>
+      <div id="textAreaBox" class="card orange hidden">
+        <div class="upload-title" style="color:#9a3412">食事の内容</div>
+        <textarea id="textInput" placeholder="例：ご飯お茶碗1杯、鮭の塩焼き、ほうれん草のお浸し"></textarea>
+        <button id="submitText" class="btn orange" type="button">AIに解析・記録してもらう</button>
+      </div>
+
+      <button id="skipMeal" class="btn gray" type="button">☕ この食事は摂らなかった（記録のみ）</button>
+      <button id="showHistory" class="btn light" type="button">🕘 過去の記録を見る</button>
+      <div id="errorBox" class="error hidden"></div>
+    </div>
+
+    <div id="resultView" class="hidden">
+      <div class="backbar"><button id="resultBack" class="back" type="button">← 戻る</button><h2>解析結果</h2></div>
+      <img id="resultImage" class="preview hidden" alt="食事画像">
+      <div class="result-head"><div id="resultMeal" class="result-title"></div><button id="editResult" class="btn small light" type="button">内容を修正</button></div>
+      <div class="stats">
+        <div class="stat">点数<b id="resultScore">-</b></div>
+        <div class="stat">カロリー<b><span id="resultCalories">0</span> kcal</b></div>
+        <div class="stat">たんぱく質<b><span id="resultProtein">0</span> g</b></div>
+        <div class="stat">脂質<b><span id="resultFat">0</span> g</b></div>
+        <div class="stat">炭水化物<b><span id="resultCarbs">0</span> g</b></div>
+        <div class="stat">塩分<b><span id="resultSalt">0</span> g</b></div>
+      </div>
+      <div id="resultMissing" class="missing hidden"></div>
+      <div id="resultAdvice" class="advice"></div>
+      <button id="resultHistory" class="btn light" type="button">過去の記録を見る</button>
+    </div>
+
+    <div id="historyView" class="hidden">
+      <div class="backbar"><button id="historyBack" class="back" type="button">← 戻る</button><h2>記録の履歴</h2></div>
+      <div id="historyList"></div>
+      <button id="loadMore" class="btn light hidden" type="button">さらに10件表示する</button>
+    </div>
+  </main>
+</div>
+
+<div id="settingsOverlay" class="overlay hidden">
+  <div class="panel">
+    <h2>⚙️ アプリ・プロフィール設定</h2>
+    <div class="form-group"><label for="nickname">お名前（呼び名）</label><input id="nickname" type="text"></div>
+    <div class="row">
+      <div class="form-group"><label for="age">年齢</label><input id="age" type="number" inputmode="numeric"></div>
+      <div class="form-group"><label for="gender">性別</label><select id="gender"><option>男性</option><option>女性</option><option>その他</option></select></div>
+    </div>
+    <div class="form-group"><label for="height">身長（cm）</label><input id="height" type="number" inputmode="decimal"></div>
+    <div class="form-group"><label for="medical">持病・気をつけていること</label><textarea id="medical"></textarea></div>
+    <div class="form-group"><label for="gasUrl">GAS WebアプリURL（/execで終わるURL）</label><textarea id="gasUrl" spellcheck="false"></textarea></div>
+    <div class="panel-actions"><button id="closeSettings" class="btn gray" type="button">キャンセル</button><button id="saveSettings" class="btn" type="button">保存して戻る</button></div>
+  </div>
+</div>
+
+<div id="editOverlay" class="overlay hidden">
+  <div class="panel">
+    <h2>✏️ 記録の編集</h2>
+    <div class="form-group"><label for="editMealName">食事名</label><input id="editMealName" type="text"></div>
+    <div class="row"><div class="form-group"><label for="editCalories">カロリー</label><input id="editCalories" type="number"></div><div class="form-group"><label for="editSalt">塩分</label><input id="editSalt" type="number" step="0.1"></div></div>
+    <div class="row"><div class="form-group"><label for="editProtein">たんぱく質</label><input id="editProtein" type="number" step="0.1"></div><div class="form-group"><label for="editFat">脂質</label><input id="editFat" type="number" step="0.1"></div><div class="form-group"><label for="editCarbs">炭水化物</label><input id="editCarbs" type="number" step="0.1"></div></div>
+    <div class="form-group"><label for="editWeight">体重</label><input id="editWeight" type="number" step="0.1"></div>
+    <div class="panel-actions"><button id="closeEdit" class="btn gray" type="button">キャンセル</button><button id="saveEdit" class="btn" type="button">上書き保存</button></div>
+  </div>
+</div>
+
+<div id="busy" class="busy hidden"><div class="spinner"></div><div id="busyText" style="font-weight:900;color:#065f46">処理しています…</div><div style="font-size:13px;color:#6b7280;margin-top:8px">画面を閉じずにお待ちください</div></div>
+
+<script>
+(function(){
+  'use strict';
+  var state={mealType:'朝ご飯',result:null,imagePreview:'',history:[],visible:10,editing:null,gasUrl:''};
+  var memoryStore={};
+  function safeGet(key){try{return window.localStorage?window.safeGet(key):memoryStore[key]||null}catch(e){return memoryStore[key]||null}}
+  function safeSet(key,val){memoryStore[key]=String(val==null?'':val);try{if(window.localStorage)window.safeSet(key,memoryStore[key])}catch(e){/* ストレージ利用不可でもアプリ動作を継続 */}}
+  function $(id){return document.getElementById(id)}
+  function show(el){el.classList.remove('hidden')}
+  function hide(el){el.classList.add('hidden')}
+  function text(el,value){el.textContent=value==null?'':String(value)}
+  function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+  function setBusy(on,message){if(on){text($('busyText'),message||'処理しています…');show($('busy'))}else{hide($('busy'))}}
+  function error(message){text($('errorBox'),message);show($('errorBox'));window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})}
+  function clearError(){hide($('errorBox'));text($('errorBox'),'')}
+  function value(id){return $(id).value.trim()}
+  function numberValue(id){var v=$(id).value;return v===''?'':Number(v)}
+  function settingsData(){return {nickname:value('nickname')||'ユーザー',age:value('age')||'未設定',gender:value('gender')||'未設定',height:value('height')||'未設定',medicalConditions:value('medical')||'特になし'}}
+  function loadSettings(){
+    $('nickname').value=safeGet('userNickname')||'たけじい';
+    $('age').value=safeGet('userAge')||'61';
+    $('gender').value=safeGet('userGender')||'男性';
+    $('height').value=safeGet('userHeight')||'';
+    $('medical').value=safeGet('userMedical')||'高血圧（塩分1日6.0g未満目安）、腰痛、眼の病気';
+    state.gasUrl=safeGet('gasUrl')||'';$('gasUrl').value=state.gasUrl;
+    var savedWeight=safeGet('userWeight');if(savedWeight)$('weight').value=savedWeight;
+    if(!state.gasUrl)show($('settingsOverlay'));
+  }
+  function saveSettings(){
+    var url=value('gasUrl');
+    if(!url){alert('GAS WebアプリURLを入力してください。');return}
+    if(url.slice(-5)!='/exec'){alert('URLの最後が /exec になっていません。');return}
+    safeSet('gasUrl',url);safeSet('userNickname',value('nickname'));safeSet('userAge',value('age'));safeSet('userGender',value('gender'));safeSet('userHeight',value('height'));safeSet('userMedical',value('medical'));
+    state.gasUrl=url;hide($('settingsOverlay'));alert('設定を保存しました。');
+  }
+  function basePayload(extra){var s=settingsData();var p={action:'record',mealType:state.mealType,date:$('recordDate').value,nickname:s.nickname,age:s.age,gender:s.gender,height:s.height,weight:value('weight')||'未設定',medicalConditions:s.medicalConditions};Object.keys(extra||{}).forEach(function(k){p[k]=extra[k]});return p}
+  function request(payload,allowDuplicate){
+    if(!state.gasUrl){show($('settingsOverlay'));return Promise.reject(new Error('GASのURLを設定してください。'))}
+    var controller=new AbortController();var timer=setTimeout(function(){controller.abort()},90000);
+    return fetch(state.gasUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),signal:controller.signal})
+      .then(function(r){if(!r.ok)throw new Error('通信エラー HTTP '+r.status);return r.text()})
+      .then(function(t){var d;try{d=JSON.parse(t)}catch(e){throw new Error('GASから正しいJSONが返りませんでした。デプロイ設定を確認してください。')}if(d.status==='duplicate'&&!allowDuplicate){var ok=confirm((d.message||'同じ内容が登録されています。')+'\n\nそれでも重複して登録しますか？');if(!ok)return {cancelled:true};payload.forceDuplicate=true;return request(payload,true)}if(d.status==='error')throw new Error(d.message||'GAS内部エラー');return d})
+      .catch(function(e){if(e.name==='AbortError')throw new Error('通信が90秒を超えたため中止しました。');throw e})
+      .finally(function(){clearTimeout(timer)});
+  }
+  function fingerprint(dataUrl){var s=dataUrl.slice(dataUrl.indexOf(',')+1);var h1=2166136261,h2=0x9e3779b9;var step=Math.max(1,Math.floor(s.length/4096));for(var i=0;i<s.length;i+=step){var c=s.charCodeAt(i);h1^=c;h1=Math.imul(h1,16777619);h2^=(c+(h2<<6)+(h2>>2))}function hex(n){return ('00000000'+(n>>>0).toString(16)).slice(-8)}return (hex(h1)+hex(h2)+hex(h1^h2)+hex((h1+h2)|0)).slice(0,32)}
+  function compress(file){
+    return new Promise(function(resolve,reject){
+      if(!file){reject(new Error('画像が選択されていません。'));return}
+      if(file.size>30*1024*1024){reject(new Error('画像が大きすぎます。30MB以下を選択してください。'));return}
+      var reader=new FileReader();reader.onerror=function(){reject(new Error('画像ファイルを開けませんでした。'))};reader.onload=function(){var img=new Image();img.onerror=function(){reject(new Error('画像形式を読み込めません。スクリーンショットまたはJPEG画像を選択してください。'))};img.onload=function(){try{var w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;if(!w||!h)throw new Error('画像サイズを取得できません。');var scale=Math.min(1,900/Math.max(w,h));w=Math.max(1,Math.round(w*scale));h=Math.max(1,Math.round(h*scale));var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;var ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);var dataUrl=canvas.toDataURL('image/jpeg',0.74);resolve({dataUrl:dataUrl,fingerprint:fingerprint(dataUrl)})}catch(e){reject(e)}};img.src=reader.result};reader.readAsDataURL(file)
+    })
+  }
+  function processImage(input){
+    var file=input.files&&input.files[0];if(!file)return;clearError();setBusy(true,'画像を読み込んでいます…');
+    compress(file).then(function(img){state.imagePreview=img.dataUrl;setBusy(true,'AIが食事を解析しています…');var p=basePayload({image:img.dataUrl.split(',')[1],mimeType:'image/jpeg',imageFingerprint:img.fingerprint});return request(p,false)}).then(function(d){if(d&&!d.cancelled)showResult(d.data)}).catch(function(e){error('【画像処理エラー】\n'+e.message)}).finally(function(){setBusy(false);input.value=''})
+  }
+  function showResult(r){state.result=r;hide($('homeView'));hide($('historyView'));show($('resultView'));text($('resultMeal'),r.mealName||'記録完了');text($('resultScore'),r.score==='-'?'-':String(r.score)+'点');text($('resultCalories'),r.calories||0);text($('resultProtein'),r.protein||0);text($('resultFat'),r.fat||0);text($('resultCarbs'),r.carbs||0);text($('resultSalt'),r.salt||0);text($('resultAdvice'),r.advice||'');var miss=Array.isArray(r.missingNutrients)?r.missingNutrients.join('、'):(r.missingNutrients||'');if(miss){text($('resultMissing'),'不足しやすい栄養素：'+miss);show($('resultMissing'))}else hide($('resultMissing'));if(state.imagePreview){$('resultImage').src=state.imagePreview;show($('resultImage'))}else hide($('resultImage'));window.scrollTo(0,0)}
+  function submitSimple(extra,busyText){clearError();if(value('weight'))safeSet('userWeight',value('weight'));setBusy(true,busyText);state.imagePreview='';request(basePayload(extra),false).then(function(d){if(d&&!d.cancelled)showResult(d.data)}).catch(function(e){error('【送信エラー】\n'+e.message)}).finally(function(){setBusy(false)})}
+  function home(){show($('homeView'));hide($('resultView'));hide($('historyView'));state.imagePreview='';window.scrollTo(0,0)}
+  function formatDate(v){var d=new Date(v);if(isNaN(d.getTime()))return v;return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+  function loadHistory(){if(!state.gasUrl){show($('settingsOverlay'));return}setBusy(true,'履歴を読み込んでいます…');fetch(state.gasUrl+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(d){if(d.status==='error')throw new Error(d.message);state.history=d.data||[];state.visible=10;renderHistory();hide($('homeView'));hide($('resultView'));show($('historyView'));window.scrollTo(0,0)}).catch(function(e){alert('履歴取得エラー：'+e.message)}).finally(function(){setBusy(false)})}
+  function renderHistory(){var list=$('historyList');list.innerHTML='';if(!state.history.length){list.innerHTML='<div class="card gray">まだ記録がありません。</div>';hide($('loadMore'));return}state.history.slice(0,state.visible).forEach(function(item,index){var div=document.createElement('div');div.className='history-item';var title=document.createElement('div');title.className='history-title';title.textContent=item.mealName||'';var date=document.createElement('div');date.className='history-date';date.textContent=formatDate(item.date);var meta=document.createElement('div');meta.className='history-meta';var parts=[];if(item.score!==''&&item.score!=='-')parts.push(item.score+'点');if(item.calories)parts.push(item.calories+' kcal');if(item.salt)parts.push('塩分 '+item.salt+'g');if(item.weight)parts.push('体重 '+item.weight+'kg');meta.textContent=parts.join(' ／ ');var edit=document.createElement('button');edit.type='button';edit.className='edit-history';edit.textContent='編集';edit.addEventListener('click',function(){openEdit(item)});div.appendChild(date);div.appendChild(title);div.appendChild(meta);div.appendChild(edit);list.appendChild(div)});if(state.history.length>state.visible)show($('loadMore'));else hide($('loadMore'))}
+  function openEdit(item){state.editing=item;$('editMealName').value=(item.mealName||'').replace(/^\[.*?\]\s*/,'');$('editCalories').value=item.calories||0;$('editProtein').value=item.protein||0;$('editFat').value=item.fat||0;$('editCarbs').value=item.carbs||0;$('editSalt').value=item.salt||0;$('editWeight').value=item.weight||'';show($('editOverlay'))}
+  function saveEdit(){if(!state.editing)return;var data={mealName:value('editMealName'),calories:numberValue('editCalories'),protein:numberValue('editProtein'),fat:numberValue('editFat'),carbs:numberValue('editCarbs'),salt:numberValue('editSalt'),weight:numberValue('editWeight')};setBusy(true,'記録を更新しています…');request({action:'update',targetDate:state.editing.date,recordData:data},true).then(function(d){if(d.status==='success'){hide($('editOverlay'));if(state.result&&state.result.date===state.editing.date){Object.keys(data).forEach(function(k){state.result[k]=data[k]});showResult(state.result)}else{loadHistory()}}}).catch(function(e){alert('更新エラー：'+e.message)}).finally(function(){setBusy(false)})}
+  document.addEventListener('DOMContentLoaded',function(){
+    $('recordDate').value=today();loadSettings();
+    $('openSettings').addEventListener('click',function(){show($('settingsOverlay'))});$('closeSettings').addEventListener('click',function(){if(state.gasUrl)hide($('settingsOverlay'))});$('saveSettings').addEventListener('click',saveSettings);
+    $('mealTabs').addEventListener('click',function(e){var b=e.target.closest('[data-meal]');if(!b)return;state.mealType=b.getAttribute('data-meal');document.querySelectorAll('.meal-tab').forEach(function(x){x.classList.toggle('active',x===b)})});
+    $('weight').addEventListener('input',function(){text($('tapTest'),'入力中：'+$('weight').value+' kg（タップ操作は正常です）')});
+    $('cameraInput').addEventListener('change',function(){processImage(this)});$('galleryInput').addEventListener('change',function(){processImage(this)});
+    $('recordWeight').addEventListener('click',function(){if(!value('weight')){alert('体重を入力してください。');return}submitSimple({recordWeightOnly:true},'体重を記録しています…')});
+    $('toggleText').addEventListener('click',function(){var hidden=$('textAreaBox').classList.contains('hidden');if(hidden){show($('textAreaBox'));text($('toggleText'),'テキスト入力を閉じる')}else{hide($('textAreaBox'));text($('toggleText'),'📝 写真なしでテキスト入力する')}});
+    $('submitText').addEventListener('click',function(){if(!value('textInput')){alert('食事内容を入力してください。');return}submitSimple({textInput:value('textInput')},'AIが食事を解析しています…')});
+    $('skipMeal').addEventListener('click',function(){if(confirm($('recordDate').value+' の '+state.mealType+' を「食事なし」として記録しますか？'))submitSimple({skipMeal:true},'食事なしを記録しています…')});
+    $('showHistory').addEventListener('click',loadHistory);$('resultHistory').addEventListener('click',loadHistory);$('resultBack').addEventListener('click',home);$('historyBack').addEventListener('click',home);$('loadMore').addEventListener('click',function(){state.visible+=10;renderHistory()});
+    $('editResult').addEventListener('click',function(){if(state.result)openEdit(state.result)});$('closeEdit').addEventListener('click',function(){hide($('editOverlay'))});$('saveEdit').addEventListener('click',saveEdit);
+  });
+})();
+</script>
+</body>
+</html>
