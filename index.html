@@ -3,12 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>毎日の健康食事アドバイザー v1.2.1</title>
+  <title>毎日の健康食事アドバイザー v1.2.2</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <!-- ★ バグを防ぐため、安定して動くバージョンのBabelに固定しました -->
   <script src="https://unpkg.com/@babel/standalone@7.23.6/babel.min.js"></script>
+  <style>
+    /* スマホSafari等で透明なfile入力が画面全体を覆う事故を防ぐ */
+    .native-file-input {
+      position: fixed !important;
+      left: -10000px !important;
+      top: 0 !important;
+      width: 1px !important;
+      height: 1px !important;
+      opacity: 0 !important;
+      overflow: hidden !important;
+      pointer-events: none !important;
+    }
+    button, input, textarea, select, label[for] {
+      touch-action: manipulation;
+    }
+    label[for="meal-camera-input"],
+    label[for="meal-gallery-input"] {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+  </style>
 </head>
 <body class="bg-emerald-50">
   <div id="root"></div>
@@ -638,7 +660,7 @@
             <header className="bg-emerald-600 text-white p-4 shadow-md z-10 flex items-center justify-between">
               <div className="flex items-center">
                 <img src="https://images.unsplash.com/photo-1490818321205-1c702fc526e6?auto=format&fit=crop&w=150&q=80" alt="Icon" className="w-12 h-12 rounded-full border-2 border-emerald-200 object-cover mr-3 shadow-sm" />
-                <div><h1 className="text-md font-bold">健康食事アドバイザー</h1><p className="text-[10px] text-emerald-100 mt-1">あなた専用のAI管理栄養士 <span className="opacity-70">v1.2.1</span></p></div>
+                <div><h1 className="text-md font-bold">健康食事アドバイザー</h1><p className="text-[10px] text-emerald-100 mt-1">あなた専用のAI管理栄養士 <span className="opacity-70">v1.2.2</span></p></div>
               </div>
               <button onClick={() => setShowSettings(true)} className="p-2 bg-emerald-700 rounded-full hover:bg-emerald-800"><Settings size={20} /></button>
             </header>
@@ -671,34 +693,43 @@
                     </div>
                   </div>
 
-                  {/* ★ カメラ / アルバム：入力欄をボタン全面に重ね、端末の画像選択を直接開く */}
+                  {/* ★ カメラ / アルバム：透明入力の全面重ねを廃止し、スマホ標準のlabel連動方式へ */}
+                  <input
+                    id="meal-camera-input"
+                    ref={cameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    aria-label="カメラで食事を撮影"
+                    className="native-file-input"
+                    onChange={handleImageUpload}
+                  />
+                  <input
+                    id="meal-gallery-input"
+                    ref={galleryInputRef}
+                    type="file"
+                    accept="image/*"
+                    aria-label="アルバムから食事画像を選ぶ"
+                    className="native-file-input"
+                    onChange={handleImageUpload}
+                  />
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                    <div className="relative border-2 border-emerald-500 rounded-2xl p-4 flex flex-col items-center justify-center bg-white hover:bg-emerald-50 shadow-sm active:scale-95 min-h-[112px] overflow-hidden">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        capture="environment"
-                        aria-label="カメラで食事を撮影"
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                        onClick={(e) => { e.currentTarget.value = ''; }}
-                        onChange={handleImageUpload}
-                      />
+                    <label
+                      htmlFor="meal-camera-input"
+                      className="border-2 border-emerald-500 rounded-2xl p-4 flex flex-col items-center justify-center bg-white hover:bg-emerald-50 shadow-sm active:scale-95 min-h-[112px] cursor-pointer"
+                    >
                       <div className="pointer-events-none w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-2 text-emerald-600"><Camera size={24} /></div>
                       <span className="pointer-events-none font-bold text-emerald-700 text-sm">カメラで撮影</span>
-                    </div>
+                    </label>
 
-                    <div className="relative border-2 border-emerald-500 rounded-2xl p-4 flex flex-col items-center justify-center bg-white hover:bg-emerald-50 shadow-sm active:scale-95 min-h-[112px] overflow-hidden">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        aria-label="アルバムから食事画像を選ぶ"
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                        onClick={(e) => { e.currentTarget.value = ''; }}
-                        onChange={handleImageUpload}
-                      />
+                    <label
+                      htmlFor="meal-gallery-input"
+                      className="border-2 border-emerald-500 rounded-2xl p-4 flex flex-col items-center justify-center bg-white hover:bg-emerald-50 shadow-sm active:scale-95 min-h-[112px] cursor-pointer"
+                    >
                       <div className="pointer-events-none w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-2 text-emerald-600"><ImageIcon size={24} /></div>
                       <span className="pointer-events-none font-bold text-emerald-700 text-sm">アルバムから選ぶ</span>
-                    </div>
+                    </label>
                   </div>
 
                   <div className="w-full mt-3 bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-800 leading-relaxed">
