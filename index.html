@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>健康食事アドバイザー v1.4.4</title>
+  <title>健康食事アドバイザー 強化版 v1.5.0</title>
   <style>
     :root{--green:#059669;--green2:#047857;--pale:#ecfdf5;--blue:#2563eb;--orange:#ea580c;--red:#dc2626;--ink:#1f2937;--muted:#6b7280;--line:#d1d5db}
     *{box-sizing:border-box}
@@ -28,6 +28,8 @@
     input[type="file"]{display:block;width:100%;max-width:100%;font-size:16px;color:#374151;background:#fff;border:1px solid #a7f3d0;border-radius:10px;padding:6px}
     input[type="file"]::file-selector-button{border:0;border-radius:8px;background:var(--green);color:#fff;padding:10px 12px;margin-right:9px;font-weight:800}
     .rice-card{background:#fffbeb;border:2px solid #fbbf24;border-radius:16px;padding:14px;margin:13px 0}.rice-card .upload-title{color:#92400e;font-size:16px}.rice-help{font-size:12px;color:#78350f;line-height:1.6;margin:5px 0 10px}.rice-row{display:grid;grid-template-columns:76px 1fr;gap:10px;align-items:center;margin-top:9px}.rice-row label{font-weight:900;color:#78350f}.rice-row select{border-color:#fbbf24;color:#78350f}.rice-result{background:#fffbeb;border:2px solid #fbbf24;color:#78350f;border-radius:12px;padding:10px 12px;margin:0 0 12px;font-weight:900;line-height:1.55}
+    .quantity-card{background:#f5f3ff;border:2px solid #8b5cf6;border-radius:16px;padding:14px;margin:13px 0}.quantity-card .upload-title{color:#5b21b6;font-size:16px}.quantity-help{font-size:12px;color:#4c1d95;line-height:1.65;margin:5px 0 10px}.quantity-row{display:grid;grid-template-columns:112px 1fr;gap:10px;align-items:center}.quantity-row label{font-weight:900;color:#5b21b6}.quantity-row select{border-color:#8b5cf6;color:#4c1d95;font-weight:800}.quantity-result{background:#f5f3ff;border:2px solid #8b5cf6;color:#4c1d95;border-radius:12px;padding:10px 12px;margin:0 0 12px;font-weight:900;line-height:1.55}
+    .health-analysis{display:flex;flex-direction:column;gap:12px;margin-top:14px}.analysis-card{border:2px solid;border-radius:16px;padding:14px;line-height:1.65}.analysis-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.analysis-title{font-size:18px;font-weight:900}.analysis-status{flex:none;border-radius:999px;padding:4px 11px;color:#fff;font-size:12px;font-weight:900;background:#64748b}.analysis-main{font-size:16px;font-weight:900;margin:4px 0}.analysis-note{font-size:13px;font-weight:700;margin:6px 0 0}.analysis-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.analysis-chip{background:#fff;border:1px solid currentColor;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:800}.salt-analysis{background:#eff6ff;border-color:#60a5fa;color:#1e3a8a}.weight-analysis{background:#fff7ed;border-color:#fb923c;color:#9a3412}.nutrition-analysis{background:#f0fdf4;border-color:#4ade80;color:#166534}.analysis-card.good .analysis-status{background:#15803d}.analysis-card.caution .analysis-status{background:#d97706}.analysis-card.high .analysis-status{background:#dc2626}.analysis-subhead{font-size:12px;font-weight:900;margin-top:8px}.analysis-disclaimer{font-size:11px;color:#6b7280;margin:8px 0 0}
     .notice{font-size:13px;line-height:1.65;color:#1e40af;background:#eff6ff;border:1px solid #bfdbfe;border-radius:13px;padding:11px;margin:12px 0}
     .hidden{display:none!important}.error{white-space:pre-wrap;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:13px;padding:13px;margin:12px 0;font-weight:700}.success{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:13px;padding:12px;margin:12px 0}
     .result-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.result-title{font-weight:900;font-size:20px;color:#065f46}.preview{width:100%;max-height:280px;object-fit:cover;border-radius:14px;border:1px solid #d1fae5;margin-bottom:12px}
@@ -57,7 +59,7 @@
 <body>
 <div class="app">
   <header>
-    <div><div class="title">🥗 健康食事アドバイザー</div><div class="version">AI相談・週間月間献立版 v1.4.4</div></div>
+    <div><div class="title">🥗 健康食事アドバイザー</div><div class="version">塩分・体重・栄養分析 強化版 v1.5.0</div></div>
     <button id="openSettings" class="header-btn" type="button" aria-label="設定">⚙️</button>
   </header>
 
@@ -79,6 +81,20 @@
         <button class="meal-tab" type="button" data-meal="夜ご飯">夜ご飯</button>
         <button class="meal-tab" type="button" data-meal="間食">間食</button>
       </div>
+
+      <section class="quantity-card" aria-labelledby="itemQuantityTitle">
+        <div id="itemQuantityTitle" class="upload-title">🍪 実際に食べた個数</div>
+        <p class="quantity-help">お菓子・パン・果物など、<strong>写真には1個だけ写っていて、同じ物を複数食べた場合</strong>に選んでください。定食や複数の料理が写った写真は「1個（写真どおり）」のままにします。</p>
+        <div class="quantity-row">
+          <label for="itemQuantity">食べた量</label>
+          <select id="itemQuantity">
+            <option value="0.5">半分（0.5個）</option>
+            <option value="1" selected>1個（写真どおり）</option>
+            <option value="2">2個</option><option value="3">3個</option><option value="4">4個</option><option value="5">5個</option>
+            <option value="6">6個</option><option value="7">7個</option><option value="8">8個</option><option value="9">9個</option><option value="10">10個</option>
+          </select>
+        </div>
+      </section>
 
       <div class="native-upload">
         <div class="upload-box">
@@ -135,6 +151,7 @@
     <div id="resultView" class="hidden">
       <div class="backbar"><button id="resultBack" class="back" type="button">← 戻る</button><h2>解析結果</h2></div>
       <img id="resultImage" class="preview hidden" alt="食事画像">
+      <div id="itemQuantityResult" class="quantity-result hidden"></div>
       <div id="riceRefillResult" class="rice-result hidden"></div>
       <div id="warningBanner" class="warning-banner hidden"></div>
       <div class="result-head"><div id="resultMeal" class="result-title"></div><button id="editResult" class="btn small light" type="button">内容を修正</button></div>
@@ -146,6 +163,24 @@
         <div class="stat">炭水化物<b><span id="resultCarbs">0</span> g</b></div>
         <div id="saltStat" class="stat">塩分<b><span id="resultSalt">0</span> g</b></div>
       </div>
+      <section class="health-analysis" aria-label="健康分析の結果">
+        <article id="saltAnalysisCard" class="analysis-card salt-analysis">
+          <div class="analysis-head"><div class="analysis-title">🧂 塩分分析</div><span id="saltAnalysisStatus" class="analysis-status">確認中</span></div>
+          <div id="saltAnalysisMain" class="analysis-main"></div><p id="saltAnalysisAdvice" class="analysis-note"></p>
+        </article>
+        <article id="weightAnalysisCard" class="analysis-card weight-analysis">
+          <div class="analysis-head"><div class="analysis-title">⚖️ 体重分析</div><span id="weightAnalysisStatus" class="analysis-status">確認中</span></div>
+          <div id="weightTrendMain" class="analysis-main"></div><div class="analysis-subhead">この食事の体重増加リスク</div>
+          <div id="weightFactors" class="analysis-chips"></div><p id="weightAnalysisAdvice" class="analysis-note"></p>
+          <p class="analysis-disclaimer">※1食だけで体重増加を断定せず、実測体重の変化と食事内容を分けて表示します。</p>
+        </article>
+        <article id="nutritionAnalysisCard" class="analysis-card nutrition-analysis">
+          <div class="analysis-head"><div class="analysis-title">🥗 栄養バランス</div><span id="nutritionAnalysisStatus" class="analysis-status">確認中</span></div>
+          <div class="analysis-subhead">良い点</div><div id="nutritionStrengths" class="analysis-chips"></div>
+          <div class="analysis-subhead">不足・過剰が疑われる点</div><div id="nutritionGaps" class="analysis-chips"></div>
+          <p id="nutritionAnalysisAdvice" class="analysis-note"></p>
+        </article>
+      </section>
       <section id="pfcCard" class="pfc-card">
         <h3 class="pfc-title">📊 PFCバランス</h3>
         <div class="pfc-main">
@@ -278,7 +313,9 @@
   function getRiceRefills(){var rows=[[2,'riceSecond'],[3,'riceThird'],[4,'riceFourth']];return rows.map(function(row){var size=value(row[1]);return size?{bowl:row[0],size:size}:null}).filter(Boolean)}
   function updateRiceRefillRows(){var second=value('riceSecond');if(!second){$('riceThird').value='';$('riceFourth').value='';hide($('riceThirdRow'));hide($('riceFourthRow'));return}show($('riceThirdRow'));var third=value('riceThird');if(!third){$('riceFourth').value='';hide($('riceFourthRow'));return}show($('riceFourthRow'))}
   function resetRiceRefills(){$('riceSecond').value='';$('riceThird').value='';$('riceFourth').value='';updateRiceRefillRows()}
-  function basePayload(extra){saveWeightForDate();var s=settingsData();var p={action:'record',mealType:state.mealType,date:$('recordDate').value,nickname:s.nickname,age:s.age,gender:s.gender,height:s.height,weight:value('weight')||'未設定',medicalConditions:s.medicalConditions,riceRefills:getRiceRefills()};Object.keys(extra||{}).forEach(function(k){p[k]=extra[k]});return p}
+  function getItemQuantity(){var amount=Number(value('itemQuantity'));return amount===0.5||(amount>=1&&amount<=10&&Math.floor(amount)===amount)?amount:1}
+  function resetItemQuantity(){$('itemQuantity').value='1'}
+  function basePayload(extra){saveWeightForDate();var s=settingsData();var p={action:'record',mealType:state.mealType,date:$('recordDate').value,nickname:s.nickname,age:s.age,gender:s.gender,height:s.height,weight:value('weight')||'未設定',medicalConditions:s.medicalConditions,itemQuantity:getItemQuantity(),riceRefills:getRiceRefills()};Object.keys(extra||{}).forEach(function(k){p[k]=extra[k]});return p}
   function request(payload,allowDuplicate){
     if(!state.gasUrl){show($('settingsOverlay'));return Promise.reject(new Error('GASのURLを設定してください。'))}
     var controller=new AbortController();var timeout=payload.action==='mealPlan'?180000:90000;var timer=setTimeout(function(){controller.abort()},timeout);
@@ -319,6 +356,13 @@
     if(tgRisk==='高い'){messages.push('中性脂肪を上げやすい要因が多い食事です。下の改善アドバイスを確認してください。')}
     if(messages.length){$('resultView').classList.add('warning-frame');var html='<strong>⚠️ 食事内容に注意が必要です</strong><ul>'+messages.map(function(m){return '<li>'+m+'</li>'}).join('')+'</ul>';$('warningBanner').innerHTML=html;show($('warningBanner'))}
   }
+  function setAnalysisLevel(card,status,level){card.classList.remove('good','caution','high');card.classList.add(level);text(status,status.dataset.label||'')}
+  function renderAnalysisChips(id,items,emptyText){var box=$(id);box.innerHTML='';var list=Array.isArray(items)?items:String(items||'').split(',').map(function(x){return x.trim()}).filter(Boolean);if(!list.length&&emptyText)list=[emptyText];list.forEach(function(item){var chip=document.createElement('span');chip.className='analysis-chip';chip.textContent=item;box.appendChild(chip)})}
+  function updateHealthAnalysis(r){
+    var salt=asNumber(r.salt),daily=asNumber(r.totalSaltTargetDate);var saltLevel=daily>=6?'high':(daily>=4.5||salt>=2.5?'caution':'good');var saltLabel=saltLevel==='high'?'上限超過':saltLevel==='caution'?'注意':'良好';$('saltAnalysisStatus').dataset.label=saltLabel;setAnalysisLevel($('saltAnalysisCard'),$('saltAnalysisStatus'),saltLevel);text($('saltAnalysisMain'),'この食事 '+salt+'g ／ 本日の累計 '+daily+'g');text($('saltAnalysisAdvice'),saltLevel==='high'?'本日はこれ以上、汁物・漬物・加工食品を控え、次の食事は素材の味を生かした薄味にしましょう。':saltLevel==='caution'?'1日6g未満の目安に近づいています。次の食事は汁を残し、調味料を追加しないようにしましょう。':'現在の累計は目安内です。この調子で薄味を続けましょう。');
+    var trend=r.weightTrend||{};var weightRisk=String(r.weightGainRisk||'低め');var weightLevel=weightRisk==='高い'||trend.status==='増加傾向'?'high':weightRisk==='注意'?'caution':'good';var weightLabel=trend.status&&trend.status!=='データ不足'&&trend.status!=='記録中'?trend.status:'食事 '+weightRisk;$('weightAnalysisStatus').dataset.label=weightLabel;setAnalysisLevel($('weightAnalysisCard'),$('weightAnalysisStatus'),weightLevel);var trendText=trend.available?'直近'+trend.periodDays+'日：'+trend.firstWeight+'kg → '+trend.latestWeight+'kg（'+(trend.change>0?'+':'')+trend.change+'kg）':(trend.message||'体重記録が不足しています。');text($('weightTrendMain'),trendText);var factors=['食事リスク：'+weightRisk].concat(Array.isArray(r.weightGainFactors)?r.weightGainFactors:[]);renderAnalysisChips('weightFactors',factors,'目立つ要因なし');text($('weightAnalysisAdvice'),r.weightGainAdvice||'量と食事回数を記録し、数日から数週間の体重変化で確認しましょう。');
+    var balance=String(r.nutritionBalance||'注意');var nutritionLevel=balance==='偏りあり'?'high':balance==='注意'?'caution':'good';$('nutritionAnalysisStatus').dataset.label=balance;setAnalysisLevel($('nutritionAnalysisCard'),$('nutritionAnalysisStatus'),nutritionLevel);renderAnalysisChips('nutritionStrengths',r.nutritionStrengths,'確認できる良い点は少なめ');renderAnalysisChips('nutritionGaps',r.nutritionGaps,'大きな偏りは見当たりません');text($('nutritionAnalysisAdvice'),r.nutritionAdvice||'主食・主菜・副菜をそろえ、次の食事で不足分を補いましょう。');
+  }
   function updateTriglyceride(r){var risk=String(r.triglycerideRisk||'');var advice=String(r.triglycerideAdvice||'');var card=$('triglycerideCard');card.classList.remove('attention','high');$('triglycerideFactors').innerHTML='';if(!risk||risk==='対象外'||!advice){hide(card);return}text($('triglycerideRisk'),risk);if(risk==='注意')card.classList.add('attention');if(risk==='高い')card.classList.add('high');var factors=Array.isArray(r.triglycerideFactors)?r.triglycerideFactors:String(r.triglycerideFactors||'').split(',');factors.filter(Boolean).slice(0,3).forEach(function(value){var chip=document.createElement('span');chip.className='tg-factor';chip.textContent=String(value).trim();$('triglycerideFactors').appendChild(chip)});text($('triglycerideAdvice'),advice);show(card)}
   function appendList(parent,title,items){if(!Array.isArray(items)||!items.length)return;var section=document.createElement('section');section.className='report-section';var h=document.createElement('h3');h.textContent=title;section.appendChild(h);var ul=document.createElement('ul');items.forEach(function(item){var li=document.createElement('li');li.textContent=item;ul.appendChild(li)});section.appendChild(ul);parent.appendChild(section)}
   function renderDetailedAdvice(data){var box=$('detailedAdviceResult');box.innerHTML='';var h=document.createElement('h3');h.textContent='AIからの具体的なアドバイス';box.appendChild(h);var p=document.createElement('p');p.textContent=data.answer||'';box.appendChild(p);appendList(box,'今日からできること',data.actionSteps);appendList(box,'置き換え例',data.replacementExamples);if(data.caution){var note=document.createElement('div');note.className='report-note';note.textContent=data.caution;box.appendChild(note)}show(box)}
@@ -328,9 +372,9 @@
   function renderReportStats(parent,data){var s=data.stats||{};var avg=s.averagePerMeal||{};var items=[['記録件数',(data.recordCount||0)+'件'],['平均カロリー',avg.calories!=null?avg.calories+' kcal':'―'],['平均塩分',avg.salt!=null?avg.salt+' g':'―'],['中性脂肪「高い」',s.highTriglycerideMealCount!=null?s.highTriglycerideMealCount+'回':'―']];if(s.firstWeight!=null&&s.latestWeight!=null)items.push(['体重の変化',(Math.round((s.latestWeight-s.firstWeight)*10)/10)+' kg']);var grid=document.createElement('div');grid.className='report-stats';items.forEach(function(item){var card=document.createElement('div');card.className='report-stat';card.appendChild(document.createTextNode(item[0]));var b=document.createElement('b');b.textContent=item[1];card.appendChild(b);grid.appendChild(card)});parent.appendChild(grid)}
   function renderMealPlan(data){var root=$('planResult');root.innerHTML='';var intro=document.createElement('div');intro.className='report-intro';var h=document.createElement('h2');h.textContent=data.title||'AI食生活レポート';var p=document.createElement('p');p.textContent=data.summary||'';var count=document.createElement('div');count.className='tap-test';count.textContent='分析した食事記録：'+(data.recordCount||0)+'件';intro.appendChild(h);intro.appendChild(p);intro.appendChild(count);root.appendChild(intro);renderReportStats(root,data);addReportText(root,'記録から分かったこと',data.dataOverview);appendList(root,'良かった点',data.strengths);appendList(root,'改善したい点',data.concerns);appendList(root,'次の期間の目標',data.goals);(data.planItems||[]).forEach(function(item){var card=document.createElement('article');card.className='plan-item';var title=document.createElement('h3');title.textContent=item.label||'献立';card.appendChild(title);[['重点',item.focus,'focus'],['朝',item.breakfast,''],['昼',item.lunch,''],['夕',item.dinner,''],['調整のコツ',item.tip,'']].forEach(function(row){if(!row[1])return;var line=document.createElement('p');if(row[2])line.className=row[2];var b=document.createElement('b');b.textContent=row[0]+'：';line.appendChild(b);line.appendChild(document.createTextNode(row[1]));card.appendChild(line)});root.appendChild(card)});appendList(root,'買い物・作り置きのコツ',data.shoppingTips);if(data.note){var note=document.createElement('div');note.className='report-note';note.textContent=data.note;root.appendChild(note)}show(root)}
   function generateMealPlan(){var s=settingsData();setBusy(true,state.planDays===7?'7日間を分析して献立を作っています…':'30日間を分析して翌月の方針を作っています…');request({action:'mealPlan',periodDays:state.planDays,endDate:value('recordDate'),preferences:value('planPreferences'),nickname:s.nickname,age:s.age,gender:s.gender,height:s.height,weight:value('weight')||'未設定',medicalConditions:s.medicalConditions},true).then(function(d){var data=d.data||{};safeSet('lastMealPlan'+state.planDays,JSON.stringify(data));renderMealPlan(data)}).catch(function(e){alert('AI献立エラー：'+e.message)}).finally(function(){setBusy(false)})}
-  function showResult(r){state.result=r;hide($('homeView'));hide($('historyView'));show($('resultView'));text($('resultMeal'),r.mealName||'記録完了');text($('resultScore'),r.score==='-'?'-':String(r.score)+'点');text($('resultCalories'),r.calories||0);text($('resultProtein'),r.protein||0);text($('resultFat'),r.fat||0);text($('resultCarbs'),r.carbs||0);text($('resultSalt'),r.salt||0);text($('resultAdvice'),r.advice||'');if(r.riceRefillSummary){text($('riceRefillResult'),'🍚 '+r.riceRefillSummary+' を栄養計算に追加済み');show($('riceRefillResult'))}else hide($('riceRefillResult'));updateWarnings(r);updatePfcCharts(r);updateTriglyceride(r);var miss=Array.isArray(r.missingNutrients)?r.missingNutrients.join('、'):(r.missingNutrients||'');if(miss){text($('resultMissing'),'不足しやすい栄養素：'+miss);show($('resultMissing'))}else hide($('resultMissing'));if(state.imagePreview){$('resultImage').src=state.imagePreview;show($('resultImage'))}else hide($('resultImage'));window.scrollTo(0,0)}
+  function showResult(r){state.result=r;hide($('homeView'));hide($('historyView'));show($('resultView'));text($('resultMeal'),r.mealName||'記録完了');text($('resultScore'),r.score==='-'?'-':String(r.score)+'点');text($('resultCalories'),r.calories||0);text($('resultProtein'),r.protein||0);text($('resultFat'),r.fat||0);text($('resultCarbs'),r.carbs||0);text($('resultSalt'),r.salt||0);text($('resultAdvice'),r.advice||'');if(r.itemQuantitySummary){text($('itemQuantityResult'),'🍪 実際に食べた量：'+r.itemQuantitySummary+'（栄養計算に反映済み）');show($('itemQuantityResult'))}else hide($('itemQuantityResult'));if(r.riceRefillSummary){text($('riceRefillResult'),'🍚 '+r.riceRefillSummary+' を栄養計算に追加済み');show($('riceRefillResult'))}else hide($('riceRefillResult'));updateWarnings(r);updateHealthAnalysis(r);updatePfcCharts(r);updateTriglyceride(r);var miss=Array.isArray(r.missingNutrients)?r.missingNutrients.join('、'):(r.missingNutrients||'');if(miss){text($('resultMissing'),'不足しやすい栄養素：'+miss);show($('resultMissing'))}else hide($('resultMissing'));if(state.imagePreview){$('resultImage').src=state.imagePreview;show($('resultImage'))}else hide($('resultImage'));window.scrollTo(0,0)}
   function submitSimple(extra,busyText){clearError();if(value('weight'))safeSet('userWeight',value('weight'));setBusy(true,busyText);state.imagePreview='';request(basePayload(extra),false).then(function(d){if(d&&!d.cancelled)showResult(d.data)}).catch(function(e){error('【送信エラー】\n'+e.message)}).finally(function(){setBusy(false)})}
-  function home(){show($('homeView'));hide($('resultView'));hide($('historyView'));state.imagePreview='';resetRiceRefills();window.scrollTo(0,0)}
+  function home(){show($('homeView'));hide($('resultView'));hide($('historyView'));state.imagePreview='';resetItemQuantity();resetRiceRefills();window.scrollTo(0,0)}
   function formatDate(v){var d=new Date(v);if(isNaN(d.getTime()))return v;return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
   function loadHistory(){if(!state.gasUrl){show($('settingsOverlay'));return}setBusy(true,'履歴を読み込んでいます…');fetch(state.gasUrl+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(d){if(d.status==='error')throw new Error(d.message);state.history=d.data||[];state.visible=10;renderHistory();hide($('homeView'));hide($('resultView'));show($('historyView'));window.scrollTo(0,0)}).catch(function(e){alert('履歴取得エラー：'+e.message)}).finally(function(){setBusy(false)})}
   function renderHistory(){var list=$('historyList');list.innerHTML='';if(!state.history.length){list.innerHTML='<div class="card gray">まだ記録がありません。</div>';hide($('loadMore'));return}state.history.slice(0,state.visible).forEach(function(item,index){var div=document.createElement('div');var score=item.score==='-'?null:asNumber(item.score);var salt=asNumber(item.salt);var tgRisk=String(item.triglycerideRisk||'');var caution=(score!==null&&score<=50)||salt>=4||tgRisk==='高い';div.className='history-item'+(caution?' warning':'');var title=document.createElement('div');title.className='history-title';title.textContent=item.mealName||'';var date=document.createElement('div');date.className='history-date';date.textContent=formatDate(item.date);var meta=document.createElement('div');meta.className='history-meta';if(caution){var badge=document.createElement('span');badge.className='warning-badge';badge.textContent='⚠️ 注意';meta.appendChild(badge)}var values=[];if(item.score!==''&&item.score!=='-')values.push(item.score+'点');if(item.calories)values.push(item.calories+' kcal');if(item.salt)values.push('塩分 '+item.salt+'g');if(tgRisk)values.push('中性脂肪 '+tgRisk);if(item.weight)values.push('体重 '+item.weight+'kg');if(values.length){var detail=document.createElement('span');detail.textContent=values.join(' ／ ');meta.appendChild(detail)}var edit=document.createElement('button');edit.type='button';edit.className='edit-history';edit.textContent='編集';edit.addEventListener('click',function(){openEdit(item)});div.appendChild(date);div.appendChild(title);div.appendChild(meta);div.appendChild(edit);list.appendChild(div)});if(state.history.length>state.visible)show($('loadMore'));else hide($('loadMore'))}
