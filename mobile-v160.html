@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>健康食事アドバイザー 長期体重・実食量分析版 v1.6.0</title>
+  <style>
+    :root{--green:#059669;--green2:#047857;--pale:#ecfdf5;--blue:#2563eb;--orange:#ea580c;--red:#dc2626;--ink:#1f2937;--muted:#6b7280;--line:#d1d5db}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;background:#ecfdf5;color:var(--ink);-webkit-text-size-adjust:100%}
+    button,input,textarea,select{font:inherit;font-size:16px}
+    button{touch-action:manipulation;cursor:pointer}
+    .app{width:100%;max-width:480px;min-height:100vh;margin:0 auto;background:#fff;box-shadow:0 0 24px rgba(0,0,0,.08)}
+    header{position:sticky;top:0;z-index:10;background:var(--green);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.14)}
+    .title{font-weight:800;font-size:17px}.version{font-size:11px;opacity:.85;margin-top:2px}.header-btn{border:0;background:#047857;color:#fff;border-radius:999px;width:42px;height:42px}
+    main{padding:16px}.card{border:1px solid #dbeafe;background:#eff6ff;border-radius:16px;padding:14px;margin-bottom:14px}.card.green{background:#f0fdf4;border-color:#bbf7d0}.card.orange{background:#fff7ed;border-color:#fed7aa}.card.gray{background:#f9fafb;border-color:#e5e7eb}
+    h2,h3,p{margin-top:0}.section-title{text-align:center;font-weight:800;color:#1e40af;margin-bottom:10px}.row{display:flex;gap:10px}.row>*{min-width:0;flex:1}
+    input[type="date"],input[type="number"],input[type="text"],textarea,select{width:100%;border:2px solid #bfdbfe;border-radius:12px;padding:11px 12px;background:#fff;color:#1e3a8a;outline:none}
+    textarea{min-height:100px;resize:vertical;color:var(--ink);border-color:#d1d5db}
+    input:focus,textarea:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+    .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:13px;padding:13px 12px;font-weight:800;color:#fff;background:var(--green);margin-top:10px;min-height:48px}
+    .btn:active{transform:scale(.985)}.btn.blue{background:var(--blue)}.btn.orange{background:var(--orange)}.btn.light{background:#fff;color:var(--green2);border:2px solid #a7f3d0}.btn.gray{background:#fff;color:#4b5563;border:2px solid #d1d5db}.btn.red{background:#fff;color:var(--red);border:2px solid #fecaca}.btn.small{width:auto;min-height:38px;padding:8px 12px;margin:0;font-size:14px}
+    .meal-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:12px 0}.meal-tab{border:1px solid #6ee7b7;border-radius:999px;padding:10px 4px;background:#fff;color:var(--green2);font-weight:800;font-size:14px}.meal-tab.active{background:var(--green);color:#fff;border-color:var(--green)}
+    .native-upload{display:grid;grid-template-columns:1fr;gap:12px;margin-top:8px}.upload-box{border:2px solid #34d399;border-radius:16px;padding:14px;background:#fff}.upload-title{font-weight:800;color:var(--green2);margin-bottom:8px}.upload-help{font-size:12px;color:var(--muted);margin:7px 0 0}
+    input[type="file"]{display:block;width:100%;max-width:100%;font-size:16px;color:#374151;background:#fff;border:1px solid #a7f3d0;border-radius:10px;padding:6px}
+    input[type="file"]::file-selector-button{border:0;border-radius:8px;background:var(--green);color:#fff;padding:10px 12px;margin-right:9px;font-weight:800}
+    .rice-card{background:#fffbeb;border:2px solid #fbbf24;border-radius:16px;padding:14px;margin:13px 0}.rice-card .upload-title{color:#92400e;font-size:16px}.rice-help{font-size:12px;color:#78350f;line-height:1.6;margin:5px 0 10px}.rice-row{display:grid;grid-template-columns:76px 1fr;gap:10px;align-items:center;margin-top:9px}.rice-row label{font-weight:900;color:#78350f}.rice-row select{border-color:#fbbf24;color:#78350f}.rice-result{background:#fffbeb;border:2px solid #fbbf24;color:#78350f;border-radius:12px;padding:10px 12px;margin:0 0 12px;font-weight:900;line-height:1.55}
+    .other-refill-card{background:#f0fdfa;border:2px solid #14b8a6;border-radius:16px;padding:14px;margin:13px 0}.other-refill-card .upload-title{color:#115e59;font-size:16px}.other-refill-help{font-size:12px;color:#134e4a;line-height:1.65;margin:5px 0 10px}.other-refill-card textarea{min-height:82px;border-color:#14b8a6;color:#134e4a}.other-refill-result{background:#f0fdfa;border:2px solid #14b8a6;color:#115e59;border-radius:12px;padding:10px 12px;margin:0 0 12px;font-weight:900;line-height:1.55}
+    .quantity-card{background:#f5f3ff;border:2px solid #8b5cf6;border-radius:16px;padding:14px;margin:13px 0}.quantity-card .upload-title{color:#5b21b6;font-size:16px}.quantity-help{font-size:12px;color:#4c1d95;line-height:1.65;margin:5px 0 10px}.quantity-row{display:grid;grid-template-columns:112px 1fr;gap:10px;align-items:center}.quantity-row label{font-weight:900;color:#5b21b6}.quantity-row select{border-color:#8b5cf6;color:#4c1d95;font-weight:800}.quantity-result{background:#f5f3ff;border:2px solid #8b5cf6;color:#4c1d95;border-radius:12px;padding:10px 12px;margin:0 0 12px;font-weight:900;line-height:1.55}
+    .health-analysis{display:flex;flex-direction:column;gap:12px;margin-top:14px}.analysis-card{border:2px solid;border-radius:16px;padding:14px;line-height:1.65}.analysis-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.analysis-title{font-size:18px;font-weight:900}.analysis-status{flex:none;border-radius:999px;padding:4px 11px;color:#fff;font-size:12px;font-weight:900;background:#64748b}.analysis-main{font-size:16px;font-weight:900;margin:4px 0}.analysis-note{font-size:13px;font-weight:700;margin:6px 0 0}.analysis-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.analysis-chip{background:#fff;border:1px solid currentColor;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:800}.salt-analysis{background:#eff6ff;border-color:#60a5fa;color:#1e3a8a}.weight-analysis{background:#fff7ed;border-color:#fb923c;color:#9a3412}.nutrition-analysis{background:#f0fdf4;border-color:#4ade80;color:#166534}.analysis-card.good .analysis-status{background:#15803d}.analysis-card.caution .analysis-status{background:#d97706}.analysis-card.high .analysis-status{background:#dc2626}.analysis-subhead{font-size:12px;font-weight:900;margin-top:8px}.analysis-disclaimer{font-size:11px;color:#6b7280;margin:8px 0 0}
+    .notice{font-size:13px;line-height:1.65;color:#1e40af;background:#eff6ff;border:1px solid #bfdbfe;border-radius:13px;padding:11px;margin:12px 0}
+    .hidden{display:none!important}.error{white-space:pre-wrap;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:13px;padding:13px;margin:12px 0;font-weight:700}.success{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:13px;padding:12px;margin:12px 0}
+    .result-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.result-title{font-weight:900;font-size:20px;color:#065f46}.preview{width:100%;max-height:280px;object-fit:cover;border-radius:14px;border:1px solid #d1fae5;margin-bottom:12px}
+    .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.stat{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:10px}.stat b{display:block;font-size:18px;margin-top:3px}.advice{white-space:pre-wrap;line-height:1.75;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:14px;margin-top:12px}.missing{background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:12px;margin-top:10px}
+    .history-item{position:relative;background:#fff;border:1px solid #d1fae5;border-radius:14px;padding:13px;margin-bottom:10px;box-shadow:0 2px 7px rgba(0,0,0,.04)}.history-title{font-weight:800;padding-right:62px}.history-date{font-size:12px;color:var(--muted);margin-bottom:5px}.history-meta{font-size:13px;color:#374151;margin-top:7px;display:flex;gap:9px;flex-wrap:wrap}.edit-history{position:absolute;right:9px;top:9px;border:1px solid #d1d5db;background:#f9fafb;border-radius:8px;padding:6px 9px;color:#374151;font-weight:700}
+    .overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}.panel{width:100%;max-width:440px;max-height:92vh;overflow:auto;background:#fff;border-radius:18px;padding:18px}.panel h2{color:#065f46}.form-group{margin-bottom:13px}.form-group label{display:block;font-size:13px;font-weight:800;color:#4b5563;margin-bottom:5px}.panel-actions{display:flex;gap:9px;position:sticky;bottom:0;background:#fff;padding-top:10px}
+    .busy{position:fixed;inset:0;z-index:200;background:rgba(255,255,255,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}.spinner{width:56px;height:56px;border:6px solid #d1fae5;border-top-color:var(--green);border-radius:50%;animation:spin .9s linear infinite;margin-bottom:16px}@keyframes spin{to{transform:rotate(360deg)}}
+    .backbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}.backbar h2{margin:0;color:#065f46}.back{width:auto;border:0;border-radius:999px;background:#d1fae5;color:#065f46;padding:9px 12px;font-weight:800}
+    .tap-test{font-size:11px;color:#047857;text-align:center;margin-top:5px}
+    .warning-banner{background:#fef2f2;border:3px solid #ef4444;color:#991b1b;border-radius:15px;padding:13px 14px;margin:0 0 13px;font-weight:800;line-height:1.6;box-shadow:0 0 0 4px rgba(239,68,68,.08)}
+    .warning-banner strong{display:block;font-size:17px;margin-bottom:3px}.warning-banner ul{margin:5px 0 0;padding-left:21px}
+    #resultView.warning-frame{border:3px solid #ef4444;border-radius:18px;background:#fffafa;padding:12px;box-shadow:0 0 0 5px rgba(239,68,68,.08)}
+    .stat.warning{background:#fef2f2;border:2px solid #ef4444;color:#991b1b;box-shadow:0 0 0 3px rgba(239,68,68,.08)}
+    .history-item.warning{border:3px solid #ef4444;background:#fff7f7}.warning-badge{display:inline-block;background:#dc2626;color:#fff;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:900}
+    .tg-card{margin-top:12px;border:2px solid #86efac;background:#f0fdf4;border-radius:15px;padding:14px;line-height:1.7}.tg-card.attention{border-color:#f59e0b;background:#fffbeb}.tg-card.high{border:3px solid #ef4444;background:#fef2f2}.tg-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.tg-title{font-weight:900;color:#166534;font-size:17px}.tg-card.attention .tg-title{color:#92400e}.tg-card.high .tg-title{color:#991b1b}.tg-risk{flex:none;border-radius:999px;padding:4px 10px;background:#15803d;color:#fff;font-size:12px;font-weight:900}.tg-card.attention .tg-risk{background:#d97706}.tg-card.high .tg-risk{background:#dc2626}.tg-factors{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0}.tg-factor{border:1px solid #fdba74;background:#fff7ed;color:#9a3412;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:800}.tg-advice{white-space:pre-wrap;color:#1f2937;font-weight:700}.tg-note{margin:8px 0 0;color:#6b7280;font-size:11px;font-weight:600}
+    .ai-tools{margin-top:14px;border:2px solid #93c5fd;background:#eff6ff;border-radius:16px;padding:14px}.ai-tools h3{color:#1e3a8a;margin-bottom:6px}.ai-tools p{color:#374151;font-size:13px;line-height:1.65;margin-bottom:8px}.ai-tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.ai-tool-grid .btn{margin-top:0;font-size:14px;padding:11px 8px}
+    .ai-answer{margin-top:13px;border:2px solid #bfdbfe;background:#eff6ff;border-radius:14px;padding:14px;line-height:1.75}.ai-answer h3,.report-section h3{color:#1e3a8a;margin:0 0 8px}.ai-answer ul,.report-section ul{margin:7px 0;padding-left:22px}.ai-answer li,.report-section li{margin-bottom:6px}.report-panel{max-width:760px}.report-intro{background:#f0fdf4;border:2px solid #86efac;border-radius:14px;padding:13px;line-height:1.75;margin-bottom:12px}.report-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:11px 0}.report-stat{border:1px solid #bfdbfe;background:#eff6ff;border-radius:11px;padding:9px;color:#1e3a8a;font-size:12px;font-weight:800}.report-stat b{display:block;color:#1f2937;font-size:17px;margin-top:2px}.report-section{border:1px solid #cbd5e1;background:#fff;border-radius:14px;padding:13px;margin-top:11px;line-height:1.7}.plan-item{border:2px solid #bfdbfe;background:#f8fafc;border-radius:14px;padding:13px;margin-top:11px}.plan-item h3{color:#1e40af;margin:0 0 7px}.plan-item p{margin:5px 0;line-height:1.65}.plan-item .focus{color:#9a3412;font-weight:800}.report-note{font-size:12px;color:#4b5563;background:#f9fafb;border:1px solid #d1d5db;border-radius:11px;padding:10px;margin-top:12px;line-height:1.6}
+    .pfc-card{margin-top:14px;background:#fff;border:1px solid #dbeafe;border-radius:16px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    .pfc-title{font-weight:900;color:#1e3a8a;text-align:center;margin:0 0 12px}.pfc-note{text-align:center;color:#6b7280;font-size:12px;margin:10px 0 0}
+    .pfc-main{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:center}.donut-wrap{position:relative;width:142px;height:142px;margin:auto}.donut{width:142px;height:142px;border-radius:50%;background:#e5e7eb;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);transition:background .5s ease}.donut::after{content:"";position:absolute;inset:29px;background:#fff;border-radius:50%;box-shadow:0 0 0 1px #e5e7eb}.donut-center{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}.donut-center span{font-size:12px;color:#6b7280;font-weight:800}.donut-center b{font-size:17px;color:#1f2937;margin-top:2px}
+    .pfc-legend{display:flex;flex-direction:column;gap:10px}.legend-row{display:grid;grid-template-columns:18px 1fr auto;gap:7px;align-items:center;font-size:13px}.legend-dot{width:13px;height:13px;border-radius:50%}.p-color{background:#2563eb}.f-color{background:#e11d48}.c-color{background:#f59e0b}.legend-row b{font-size:14px}
+    .pfc-bars{margin-top:14px;display:flex;flex-direction:column;gap:10px}.bar-row{display:grid;grid-template-columns:82px 1fr 54px;gap:8px;align-items:center;font-size:12px;font-weight:800}.bar-track{height:17px;border-radius:999px;background:#e5e7eb;overflow:hidden}.bar-fill{height:100%;width:0;border-radius:999px;transition:width .7s ease}.bar-fill.p{background:#2563eb}.bar-fill.f{background:#e11d48}.bar-fill.c{background:#f59e0b}.bar-value{text-align:right;color:#374151}
+    @media(max-width:380px){.pfc-main{grid-template-columns:1fr}.pfc-legend{display:grid;grid-template-columns:repeat(3,1fr)}.legend-row{grid-template-columns:14px 1fr;gap:4px}.legend-row b{grid-column:1/-1;text-align:center;font-size:12px}.bar-row{grid-template-columns:72px 1fr 48px}}
+    @media(min-width:600px){.app{margin:16px auto;min-height:calc(100vh - 32px);border-radius:20px;overflow:hidden}.native-upload{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div><div class="title">🥗 健康食事アドバイザー</div><div class="version">長期体重・実食量分析版 v1.6.0</div></div>
+    <button id="openSettings" class="header-btn" type="button" aria-label="設定">⚙️</button>
+  </header>
+
+  <main>
+    <div id="homeView">
+      <div class="card">
+        <div class="section-title">📅 記録する日付 と 今日の体重</div>
+        <div class="row">
+          <input id="recordDate" type="date">
+          <input id="weight" type="number" inputmode="decimal" step="0.1" placeholder="体重 kg">
+        </div>
+        <button id="recordWeight" class="btn blue" type="button">⚖️ 体重だけを記録する</button>
+        <div id="tapTest" class="tap-test">一度入力した体重は日付ごとに保存され、同じ日は自動で表示されます。</div>
+      </div>
+
+      <div class="meal-tabs" id="mealTabs">
+        <button class="meal-tab active" type="button" data-meal="朝ご飯">朝ご飯</button>
+        <button class="meal-tab" type="button" data-meal="昼ご飯">昼ご飯</button>
+        <button class="meal-tab" type="button" data-meal="夜ご飯">夜ご飯</button>
+        <button class="meal-tab" type="button" data-meal="間食">間食</button>
+      </div>
+
+      <section class="rice-card" aria-labelledby="riceRefillTitle">
+        <div id="riceRefillTitle" class="upload-title">🍚 ごはんのおかわり（追加分だけ）</div>
+        <p class="rice-help">画像を選ぶ前に設定してください。画像に写っている最初のごはんはAIが判定するため、<strong>画像に写っていないおかわり分だけ</strong>選びます。</p>
+        <div class="rice-row"><label for="riceSecond">2杯目</label><select id="riceSecond"><option value="">なし</option><option value="small">小盛り（約100g）</option><option value="medium">中盛り（約150g）</option><option value="large">大盛り（約200g）</option></select></div>
+        <div id="riceThirdRow" class="rice-row hidden"><label for="riceThird">3杯目</label><select id="riceThird"><option value="">なし</option><option value="small">小盛り（約100g）</option><option value="medium">中盛り（約150g）</option><option value="large">大盛り（約200g）</option></select></div>
+        <div id="riceFourthRow" class="rice-row hidden"><label for="riceFourth">4杯目</label><select id="riceFourth"><option value="">なし</option><option value="small">小盛り（約100g）</option><option value="medium">中盛り（約150g）</option><option value="large">大盛り（約200g）</option></select></div>
+      </section>
+
+      <section class="other-refill-card" aria-labelledby="otherRefillTitle">
+        <div id="otherRefillTitle" class="upload-title">🍛 その他のおかわり（自由入力）</div>
+        <p class="other-refill-help">カレーのルー、おかず、ビールなど、<strong>画像に写っていない追加分</strong>を品名と量まで入力してください。複数ある場合は読点や改行で続けて入力できます。</p>
+        <textarea id="otherRefillText" maxlength="300" placeholder="例：カレーのルーをお玉1杯、唐揚げ2個、ビール中ジョッキ1杯"></textarea>
+      </section>
+
+      <section class="quantity-card" aria-labelledby="itemQuantityTitle">
+        <div id="itemQuantityTitle" class="upload-title">🍪 実際に食べた個数</div>
+        <p class="quantity-help">お菓子・パン・果物など、<strong>写真には1個だけ写っていて、同じ物を複数食べた場合</strong>に選んでください。定食や複数の料理が写った写真は「1個（写真どおり）」のままにします。</p>
+        <div class="quantity-row">
+          <label for="itemQuantity">食べた量</label>
+          <select id="itemQuantity">
+            <option value="0.5">半分（0.5個）</option>
+            <option value="1" selected>1個（写真どおり）</option>
+            <option value="2">2個</option><option value="3">3個</option><option value="4">4個</option><option value="5">5個</option>
+            <option value="6">6個</option><option value="7">7個</option><option value="8">8個</option><option value="9">9個</option><option value="10">10個</option>
+          </select>
+        </div>
+      </section>
+
+      <div class="native-upload">
+        <div class="upload-box">
+          <div class="upload-title">📷 カメラで撮影</div>
+          <input id="cameraInput" type="file" accept="image/*" capture="environment">
+          <p class="upload-help">この欄は隠していないため、スマホ標準のカメラ選択が直接開きます。</p>
+        </div>
+        <div class="upload-box">
+          <div class="upload-title">🖼️ アルバムから選ぶ</div>
+          <input id="galleryInput" type="file" accept="image/*">
+          <p class="upload-help">写真・スクリーンショットを選択できます。</p>
+        </div>
+      </div>
+
+      <div class="notice">🔒 食事画像はGoogle Driveへ保存せず、端末内で縮小してAI解析にだけ使用します。<br>⚠️ 同じ日付に同じ画像・同じテキスト・同じ体重を登録すると、保存前に確認を表示します。</div>
+
+      <button id="toggleText" class="btn light" type="button">📝 写真なしでテキスト入力する</button>
+      <div id="textAreaBox" class="card orange hidden">
+        <div class="upload-title" style="color:#9a3412">食事の内容</div>
+        <textarea id="textInput" placeholder="例：ご飯お茶碗1杯、鮭の塩焼き、ほうれん草のお浸し"></textarea>
+        <button id="submitText" class="btn orange" type="button">AIに解析・記録してもらう</button>
+      </div>
+
+      <button id="skipMeal" class="btn gray" type="button">☕ この食事は摂らなかった（記録のみ）</button>
+      <button id="showHistory" class="btn light" type="button">🕘 過去の記録を見る</button>
+      <section class="ai-tools">
+        <h3>🤖 AI食生活レポート・献立</h3>
+        <p>これまでの記録をまとめて分析し、次の期間の献立を提案します。</p>
+        <div class="ai-tool-grid">
+          <button id="weeklyPlan" class="btn blue" type="button">7日間を分析</button>
+          <button id="monthlyPlan" class="btn orange" type="button">30日間を分析</button>
+        </div>
+        <h3 style="margin-top:18px">⚖️ 体重増加の要因分析</h3>
+        <p>実測体重と、個数・ごはん・その他のおかわりを含む食事記録を照合します。</p>
+        <div class="ai-tool-grid">
+          <button id="weight90" class="btn blue" type="button">3か月を分析</button>
+          <button id="weight180" class="btn orange" type="button">半年を分析</button>
+        </div>
+      </section>
+      <div id="errorBox" class="error hidden"></div>
+    </div>
+
+    <div id="resultView" class="hidden">
+      <div class="backbar"><button id="resultBack" class="back" type="button">← 戻る</button><h2>解析結果</h2></div>
+      <img id="resultImage" class="preview hidden" alt="食事画像">
+      <div id="itemQuantityResult" class="quantity-result hidden"></div>
+      <div id="riceRefillResult" class="rice-result hidden"></div>
+      <div id="otherRefillResult" class="other-refill-result hidden"></div>
+      <div id="warningBanner" class="warning-banner hidden"></div>
+      <div class="result-head"><div id="resultMeal" class="result-title"></div><button id="editResult" class="btn small light" type="button">内容を修正</button></div>
+      <div class="stats">
+        <div id="scoreStat" class="stat">点数<b id="resultScore">-</b></div>
+        <div class="stat">カロリー<b><span id="resultCalories">0</span> kcal</b></div>
+        <div class="stat">たんぱく質<b><span id="resultProtein">0</span> g</b></div>
+        <div class="stat">脂質<b><span id="resultFat">0</span> g</b></div>
+        <div class="stat">炭水化物<b><span id="resultCarbs">0</span> g</b></div>
+        <div id="saltStat" class="stat">塩分<b><span id="resultSalt">0</span> g</b></div>
+      </div>
+      <section class="health-analysis" aria-label="健康分析の結果">
+        <article id="saltAnalysisCard" class="analysis-card salt-analysis">
+          <div class="analysis-head"><div class="analysis-title">🧂 塩分分析</div><span id="saltAnalysisStatus" class="analysis-status">確認中</span></div>
+          <div id="saltAnalysisMain" class="analysis-main"></div><p id="saltAnalysisAdvice" class="analysis-note"></p>
+        </article>
+        <article id="weightAnalysisCard" class="analysis-card weight-analysis">
+          <div class="analysis-head"><div class="analysis-title">⚖️ 体重分析</div><span id="weightAnalysisStatus" class="analysis-status">確認中</span></div>
+          <div id="weightTrendMain" class="analysis-main"></div><div class="analysis-subhead">この食事の体重増加リスク</div>
+          <div id="weightFactors" class="analysis-chips"></div><p id="weightAnalysisAdvice" class="analysis-note"></p>
+          <p class="analysis-disclaimer">※1食だけで体重増加を断定せず、実測体重の変化と食事内容を分けて表示します。</p>
+        </article>
+        <article id="nutritionAnalysisCard" class="analysis-card nutrition-analysis">
+          <div class="analysis-head"><div class="analysis-title">🥗 栄養バランス</div><span id="nutritionAnalysisStatus" class="analysis-status">確認中</span></div>
+          <div class="analysis-subhead">良い点</div><div id="nutritionStrengths" class="analysis-chips"></div>
+          <div class="analysis-subhead">不足・過剰が疑われる点</div><div id="nutritionGaps" class="analysis-chips"></div>
+          <p id="nutritionAnalysisAdvice" class="analysis-note"></p>
+        </article>
+      </section>
+      <section id="pfcCard" class="pfc-card">
+        <h3 class="pfc-title">📊 PFCバランス</h3>
+        <div class="pfc-main">
+          <div class="donut-wrap">
+            <div id="pfcDonut" class="donut"></div>
+            <div class="donut-center"><span>合計熱量</span><b id="pfcTotalCalories">0 kcal</b></div>
+          </div>
+          <div class="pfc-legend">
+            <div class="legend-row"><span class="legend-dot p-color"></span><span>たんぱく質</span><b id="pfcLegendP">0%</b></div>
+            <div class="legend-row"><span class="legend-dot f-color"></span><span>脂質</span><b id="pfcLegendF">0%</b></div>
+            <div class="legend-row"><span class="legend-dot c-color"></span><span>炭水化物</span><b id="pfcLegendC">0%</b></div>
+          </div>
+        </div>
+        <div class="pfc-bars">
+          <div class="bar-row"><span>たんぱく質</span><div class="bar-track"><div id="pfcBarP" class="bar-fill p"></div></div><span id="pfcBarPValue" class="bar-value">0g</span></div>
+          <div class="bar-row"><span>脂質</span><div class="bar-track"><div id="pfcBarF" class="bar-fill f"></div></div><span id="pfcBarFValue" class="bar-value">0g</span></div>
+          <div class="bar-row"><span>炭水化物</span><div class="bar-track"><div id="pfcBarC" class="bar-fill c"></div></div><span id="pfcBarCValue" class="bar-value">0g</span></div>
+        </div>
+        <p class="pfc-note">円グラフと棒グラフは、P・F・Cが生み出すカロリー比で表示します。</p>
+      </section>
+      <div id="resultMissing" class="missing hidden"></div>
+      <section id="triglycerideCard" class="tg-card hidden">
+        <div class="tg-head"><div class="tg-title">🫀 中性脂肪への影響</div><span id="triglycerideRisk" class="tg-risk">低め</span></div>
+        <div id="triglycerideFactors" class="tg-factors"></div>
+        <div id="triglycerideAdvice" class="tg-advice"></div>
+        <p class="tg-note">※この食事内容から見た目安です。血液検査の中性脂肪値を判定するものではありません。</p>
+      </section>
+      <div id="resultAdvice" class="advice"></div>
+      <button id="openAiConsult" class="btn blue" type="button">🤖 この食事をAIに詳しく相談する</button>
+      <button id="resultHistory" class="btn light" type="button">過去の記録を見る</button>
+    </div>
+
+    <div id="historyView" class="hidden">
+      <div class="backbar"><button id="historyBack" class="back" type="button">← 戻る</button><h2>記録の履歴</h2></div>
+      <div id="historyList"></div>
+      <button id="loadMore" class="btn light hidden" type="button">さらに10件表示する</button>
+    </div>
+  </main>
+</div>
+
+<div id="adviceOverlay" class="overlay hidden">
+  <div class="panel">
+    <h2>🤖 この食事をAIに相談</h2>
+    <div class="form-group"><label for="advicePreset">聞きたいこと</label><select id="advicePreset"><option value="この食事のどこを改善すればよいですか？">この食事の改善点</option><option value="中性脂肪への影響と、何を減らすべきか詳しく教えてください。">中性脂肪への対策</option><option value="塩分を減らす具体的な方法を教えてください。">塩分を減らす方法</option><option value="この食事の代わりになる献立を教えてください。">代わりの献立</option><option value="次の食事でどのように調整すればよいですか？">次の食事で調整</option></select></div>
+    <div class="form-group"><label for="adviceQuestion">追加の質問（任意）</label><textarea id="adviceQuestion" placeholder="例：コンビニで買える代替品を教えて"></textarea></div>
+    <button id="askDetailedAdvice" class="btn blue" type="button">AIに具体策を聞く</button>
+    <div id="detailedAdviceResult" class="ai-answer hidden"></div>
+    <button id="closeAdvice" class="btn gray" type="button">閉じる</button>
+  </div>
+</div>
+
+<div id="planOverlay" class="overlay hidden">
+  <div class="panel report-panel">
+    <h2 id="planOverlayTitle">🤖 AI食生活レポート</h2>
+    <div id="planPreferencesGroup" class="form-group"><label for="planPreferences">献立の希望・条件（任意）</label><textarea id="planPreferences" placeholder="例：簡単調理、節約、和食中心、苦手な食材、1日の予算、外食が多い、飲酒・甘い飲料の頻度"></textarea></div>
+    <button id="generatePlan" class="btn blue" type="button">分析して献立を作る</button>
+    <div id="planResult" class="hidden"></div>
+    <button id="closePlan" class="btn gray" type="button">閉じる</button>
+  </div>
+</div>
+
+<div id="settingsOverlay" class="overlay hidden">
+  <div class="panel">
+    <h2>⚙️ アプリ・プロフィール設定</h2>
+    <div class="form-group"><label for="nickname">お名前（呼び名）</label><input id="nickname" type="text"></div>
+    <div class="row">
+      <div class="form-group"><label for="age">年齢</label><input id="age" type="number" inputmode="numeric"></div>
+      <div class="form-group"><label for="gender">性別</label><select id="gender"><option>男性</option><option>女性</option><option>その他</option></select></div>
+    </div>
+    <div class="form-group"><label for="height">身長（cm）</label><input id="height" type="number" inputmode="decimal"></div>
+    <div class="form-group"><label for="medical">持病・気をつけていること</label><textarea id="medical"></textarea></div>
+    <div class="form-group"><label for="gasUrl">GAS WebアプリURL（/execで終わるURL）</label><textarea id="gasUrl" spellcheck="false"></textarea></div>
+    <div class="panel-actions"><button id="closeSettings" class="btn gray" type="button">キャンセル</button><button id="saveSettings" class="btn" type="button">保存して戻る</button></div>
+  </div>
+</div>
+
+<div id="editOverlay" class="overlay hidden">
+  <div class="panel">
+    <h2>✏️ 記録の編集</h2>
+    <div class="form-group"><label for="editMealName">食事名</label><input id="editMealName" type="text"></div>
+    <div class="row"><div class="form-group"><label for="editCalories">カロリー</label><input id="editCalories" type="number"></div><div class="form-group"><label for="editSalt">塩分</label><input id="editSalt" type="number" step="0.1"></div></div>
+    <div class="row"><div class="form-group"><label for="editProtein">たんぱく質</label><input id="editProtein" type="number" step="0.1"></div><div class="form-group"><label for="editFat">脂質</label><input id="editFat" type="number" step="0.1"></div><div class="form-group"><label for="editCarbs">炭水化物</label><input id="editCarbs" type="number" step="0.1"></div></div>
+    <div class="form-group"><label for="editWeight">体重</label><input id="editWeight" type="number" step="0.1"></div>
+    <div class="panel-actions"><button id="closeEdit" class="btn gray" type="button">キャンセル</button><button id="saveEdit" class="btn" type="button">上書き保存</button></div>
+  </div>
+</div>
+
+<div id="busy" class="busy hidden"><div class="spinner"></div><div id="busyText" style="font-weight:900;color:#065f46">処理しています…</div><div style="font-size:13px;color:#6b7280;margin-top:8px">画面を閉じずにお待ちください</div></div>
+
+<script>
+(function(){
+  'use strict';
+  var state={mealType:'朝ご飯',result:null,imagePreview:'',history:[],visible:10,editing:null,gasUrl:'',planDays:7,reportMode:'mealPlan'};
+  var memoryStore={};
+  function safeGet(key){try{var v=window.localStorage?window.localStorage.getItem(key):null;return v!==null?v:(memoryStore[key]||null)}catch(e){return memoryStore[key]||null}}
+  function safeSet(key,val){memoryStore[key]=String(val==null?'':val);try{if(window.localStorage)window.localStorage.setItem(key,memoryStore[key])}catch(e){/* ストレージ利用不可でもアプリ動作を継続 */}}
+  function readDailyWeights(){var raw=safeGet('dailyWeights');if(!raw)return {};try{var parsed=JSON.parse(raw);return parsed&&typeof parsed==='object'?parsed:{}}catch(e){return {}}}
+  function saveWeightForDate(){var date=value('recordDate');var weight=value('weight');if(!date)return;var weights=readDailyWeights();if(weight){weights[date]=weight;safeSet('userWeight',weight)}else{delete weights[date]}safeSet('dailyWeights',JSON.stringify(weights))}
+  function loadWeightForDate(){var date=value('recordDate');var weights=readDailyWeights();$('weight').value=date&&weights[date]?weights[date]:'';text($('tapTest'),$('weight').value?'保存済み：'+$('weight').value+' kg（この日の食事記録に自動で使用します）':'この日付の体重はまだ設定されていません。')}
+  function $(id){return document.getElementById(id)}
+  function show(el){el.classList.remove('hidden')}
+  function hide(el){el.classList.add('hidden')}
+  function text(el,value){el.textContent=value==null?'':String(value)}
+  function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+  function setBusy(on,message){if(on){text($('busyText'),message||'処理しています…');show($('busy'))}else{hide($('busy'))}}
+  function error(message){text($('errorBox'),message);show($('errorBox'));window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})}
+  function clearError(){hide($('errorBox'));text($('errorBox'),'')}
+  function value(id){return $(id).value.trim()}
+  function numberValue(id){var v=$(id).value;return v===''?'':Number(v)}
+  function settingsData(){return {nickname:value('nickname')||'ユーザー',age:value('age')||'未設定',gender:value('gender')||'未設定',height:value('height')||'未設定',medicalConditions:value('medical')||'特になし'}}
+  function loadSettings(){
+    $('nickname').value=safeGet('userNickname')||'たけじい';
+    $('age').value=safeGet('userAge')||'61';
+    $('gender').value=safeGet('userGender')||'男性';
+    $('height').value=safeGet('userHeight')||'';
+    $('medical').value=safeGet('userMedical')||'高血圧（塩分1日6.0g未満目安）、中性脂肪、腰痛、眼の病気';
+    state.gasUrl=safeGet('gasUrl')||'';$('gasUrl').value=state.gasUrl;
+    var weights=readDailyWeights();var date=value('recordDate');var savedWeight=safeGet('userWeight');
+    if(!safeGet('dailyWeightMigrationDone')){if(date&&!weights[date]&&savedWeight){weights[date]=savedWeight;safeSet('dailyWeights',JSON.stringify(weights))}safeSet('dailyWeightMigrationDone','1')}
+    loadWeightForDate();
+    if(!state.gasUrl)show($('settingsOverlay'));
+  }
+  function saveSettings(){
+    var url=value('gasUrl');
+    if(!url){alert('GAS WebアプリURLを入力してください。');return}
+    if(url.slice(-5)!='/exec'){alert('URLの最後が /exec になっていません。');return}
+    safeSet('gasUrl',url);safeSet('userNickname',value('nickname'));safeSet('userAge',value('age'));safeSet('userGender',value('gender'));safeSet('userHeight',value('height'));safeSet('userMedical',value('medical'));
+    state.gasUrl=url;hide($('settingsOverlay'));alert('設定を保存しました。');
+  }
+  function getRiceRefills(){var rows=[[2,'riceSecond'],[3,'riceThird'],[4,'riceFourth']];return rows.map(function(row){var size=value(row[1]);return size?{bowl:row[0],size:size}:null}).filter(Boolean)}
+  function getOtherRefillText(){return value('otherRefillText').slice(0,300)}
+  function updateRiceRefillRows(){var second=value('riceSecond');if(!second){$('riceThird').value='';$('riceFourth').value='';hide($('riceThirdRow'));hide($('riceFourthRow'));return}show($('riceThirdRow'));var third=value('riceThird');if(!third){$('riceFourth').value='';hide($('riceFourthRow'));return}show($('riceFourthRow'))}
+  function resetRiceRefills(){$('riceSecond').value='';$('riceThird').value='';$('riceFourth').value='';updateRiceRefillRows()}
+  function resetOtherRefill(){$('otherRefillText').value=''}
+  function getItemQuantity(){var amount=Number(value('itemQuantity'));return amount===0.5||(amount>=1&&amount<=10&&Math.floor(amount)===amount)?amount:1}
+  function resetItemQuantity(){$('itemQuantity').value='1'}
+  function basePayload(extra){saveWeightForDate();var s=settingsData();var p={action:'record',mealType:state.mealType,date:$('recordDate').value,nickname:s.nickname,age:s.age,gender:s.gender,height:s.height,weight:value('weight')||'未設定',medicalConditions:s.medicalConditions,itemQuantity:getItemQuantity(),riceRefills:getRiceRefills(),otherRefillText:getOtherRefillText()};Object.keys(extra||{}).forEach(function(k){p[k]=extra[k]});return p}
+  function request(payload,allowDuplicate){
+    if(!state.gasUrl){show($('settingsOverlay'));return Promise.reject(new Error('GASのURLを設定してください。'))}
+    var controller=new AbortController();var timeout=payload.action==='mealPlan'?180000:90000;var timer=setTimeout(function(){controller.abort()},timeout);
+    return fetch(state.gasUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),signal:controller.signal})
+      .then(function(r){if(!r.ok)throw new Error('通信エラー HTTP '+r.status);return r.text()})
+      .then(function(t){var d;try{d=JSON.parse(t)}catch(e){throw new Error('GASから正しいJSONが返りませんでした。デプロイ設定を確認してください。')}if(d.status==='duplicate'&&!allowDuplicate){var ok=confirm((d.message||'同じ内容が登録されています。')+'\n\nそれでも重複して登録しますか？');if(!ok)return {cancelled:true};payload.forceDuplicate=true;return request(payload,true)}if(d.status==='error')throw new Error(d.message||'GAS内部エラー');return d})
+      .catch(function(e){if(e.name==='AbortError')throw new Error('AIの回答に時間がかかりすぎたため中止しました。もう一度お試しください。');throw e})
+      .finally(function(){clearTimeout(timer)});
+  }
+  function fingerprint(dataUrl){var s=dataUrl.slice(dataUrl.indexOf(',')+1);var h1=2166136261,h2=0x9e3779b9;var step=Math.max(1,Math.floor(s.length/4096));for(var i=0;i<s.length;i+=step){var c=s.charCodeAt(i);h1^=c;h1=Math.imul(h1,16777619);h2^=(c+(h2<<6)+(h2>>2))}function hex(n){return ('00000000'+(n>>>0).toString(16)).slice(-8)}return (hex(h1)+hex(h2)+hex(h1^h2)+hex((h1+h2)|0)).slice(0,32)}
+  function compress(file){
+    return new Promise(function(resolve,reject){
+      if(!file){reject(new Error('画像が選択されていません。'));return}
+      if(file.size>30*1024*1024){reject(new Error('画像が大きすぎます。30MB以下を選択してください。'));return}
+      var reader=new FileReader();reader.onerror=function(){reject(new Error('画像ファイルを開けませんでした。'))};reader.onload=function(){var img=new Image();img.onerror=function(){reject(new Error('画像形式を読み込めません。スクリーンショットまたはJPEG画像を選択してください。'))};img.onload=function(){try{var w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;if(!w||!h)throw new Error('画像サイズを取得できません。');var scale=Math.min(1,900/Math.max(w,h));w=Math.max(1,Math.round(w*scale));h=Math.max(1,Math.round(h*scale));var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;var ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);var dataUrl=canvas.toDataURL('image/jpeg',0.74);resolve({dataUrl:dataUrl,fingerprint:fingerprint(dataUrl)})}catch(e){reject(e)}};img.src=reader.result};reader.readAsDataURL(file)
+    })
+  }
+  function processImage(input){
+    var file=input.files&&input.files[0];if(!file)return;clearError();setBusy(true,'画像を読み込んでいます…');
+    compress(file).then(function(img){state.imagePreview=img.dataUrl;setBusy(true,'AIが食事を解析しています…');var p=basePayload({image:img.dataUrl.split(',')[1],mimeType:'image/jpeg',imageFingerprint:img.fingerprint});return request(p,false)}).then(function(d){if(d&&!d.cancelled)showResult(d.data)}).catch(function(e){error('【画像処理エラー】\n'+e.message)}).finally(function(){setBusy(false);input.value=''})
+  }
+  function asNumber(v){var n=Number(v);return isFinite(n)?n:0}
+  function updatePfcCharts(r){
+    var p=Math.max(0,asNumber(r.protein)),f=Math.max(0,asNumber(r.fat)),c=Math.max(0,asNumber(r.carbs));
+    var pCal=p*4,fCal=f*9,cCal=c*4,total=pCal+fCal+cCal;
+    var pPct=total?Math.round(pCal/total*100):0;var fPct=total?Math.round(fCal/total*100):0;var cPct=Math.max(0,100-pPct-fPct);
+    var pEnd=pPct;var fEnd=pPct+fPct;
+    $('pfcDonut').style.background=total?'conic-gradient(#2563eb 0 '+pEnd+'%, #e11d48 '+pEnd+'% '+fEnd+'%, #f59e0b '+fEnd+'% 100%)':'#e5e7eb';
+    text($('pfcTotalCalories'),Math.round(total)+' kcal');text($('pfcLegendP'),pPct+'%');text($('pfcLegendF'),fPct+'%');text($('pfcLegendC'),cPct+'%');
+    $('pfcBarP').style.width=pPct+'%';$('pfcBarF').style.width=fPct+'%';$('pfcBarC').style.width=cPct+'%';
+    text($('pfcBarPValue'),p+'g');text($('pfcBarFValue'),f+'g');text($('pfcBarCValue'),c+'g');
+  }
+  function updateWarnings(r){
+    var score=r.score==='-'?null:asNumber(r.score);var salt=asNumber(r.salt);var tgRisk=String(r.triglycerideRisk||'');var messages=[];
+    $('resultView').classList.remove('warning-frame');$('scoreStat').classList.remove('warning');$('saltStat').classList.remove('warning');hide($('warningBanner'));$('warningBanner').innerHTML='';
+    if(score!==null&&score<=50){messages.push('食事点数が50点以下です。栄養バランスや量を見直しましょう。');$('scoreStat').classList.add('warning')}
+    if(salt>=4){messages.push('この1食の塩分が4g以上です。高血圧対策として、次の食事は薄味を意識してください。');$('saltStat').classList.add('warning')}
+    if(tgRisk==='高い'){messages.push('中性脂肪を上げやすい要因が多い食事です。下の改善アドバイスを確認してください。')}
+    if(messages.length){$('resultView').classList.add('warning-frame');var html='<strong>⚠️ 食事内容に注意が必要です</strong><ul>'+messages.map(function(m){return '<li>'+m+'</li>'}).join('')+'</ul>';$('warningBanner').innerHTML=html;show($('warningBanner'))}
+  }
+  function setAnalysisLevel(card,status,level){card.classList.remove('good','caution','high');card.classList.add(level);text(status,status.dataset.label||'')}
+  function renderAnalysisChips(id,items,emptyText){var box=$(id);box.innerHTML='';var list=Array.isArray(items)?items:String(items||'').split(',').map(function(x){return x.trim()}).filter(Boolean);if(!list.length&&emptyText)list=[emptyText];list.forEach(function(item){var chip=document.createElement('span');chip.className='analysis-chip';chip.textContent=item;box.appendChild(chip)})}
+  function updateHealthAnalysis(r){
+    var salt=asNumber(r.salt),daily=asNumber(r.totalSaltTargetDate);var saltLevel=daily>=6?'high':(daily>=4.5||salt>=2.5?'caution':'good');var saltLabel=saltLevel==='high'?'上限超過':saltLevel==='caution'?'注意':'良好';$('saltAnalysisStatus').dataset.label=saltLabel;setAnalysisLevel($('saltAnalysisCard'),$('saltAnalysisStatus'),saltLevel);text($('saltAnalysisMain'),'この食事 '+salt+'g ／ 本日の累計 '+daily+'g');text($('saltAnalysisAdvice'),saltLevel==='high'?'本日はこれ以上、汁物・漬物・加工食品を控え、次の食事は素材の味を生かした薄味にしましょう。':saltLevel==='caution'?'1日6g未満の目安に近づいています。次の食事は汁を残し、調味料を追加しないようにしましょう。':'現在の累計は目安内です。この調子で薄味を続けましょう。');
+    var trend=r.weightTrend||{};var weightRisk=String(r.weightGainRisk||'低め');var weightLevel=weightRisk==='高い'||trend.status==='増加傾向'?'high':weightRisk==='注意'?'caution':'good';var weightLabel=trend.status&&trend.status!=='データ不足'&&trend.status!=='記録中'?trend.status:'食事 '+weightRisk;$('weightAnalysisStatus').dataset.label=weightLabel;setAnalysisLevel($('weightAnalysisCard'),$('weightAnalysisStatus'),weightLevel);var trendText=trend.available?'直近'+trend.periodDays+'日：'+trend.firstWeight+'kg → '+trend.latestWeight+'kg（'+(trend.change>0?'+':'')+trend.change+'kg）':(trend.message||'体重記録が不足しています。');text($('weightTrendMain'),trendText);var factors=['食事リスク：'+weightRisk].concat(Array.isArray(r.weightGainFactors)?r.weightGainFactors:[]);renderAnalysisChips('weightFactors',factors,'目立つ要因なし');text($('weightAnalysisAdvice'),r.weightGainAdvice||'量と食事回数を記録し、数日から数週間の体重変化で確認しましょう。');
+    var balance=String(r.nutritionBalance||'注意');var nutritionLevel=balance==='偏りあり'?'high':balance==='注意'?'caution':'good';$('nutritionAnalysisStatus').dataset.label=balance;setAnalysisLevel($('nutritionAnalysisCard'),$('nutritionAnalysisStatus'),nutritionLevel);renderAnalysisChips('nutritionStrengths',r.nutritionStrengths,'確認できる良い点は少なめ');renderAnalysisChips('nutritionGaps',r.nutritionGaps,'大きな偏りは見当たりません');text($('nutritionAnalysisAdvice'),r.nutritionAdvice||'主食・主菜・副菜をそろえ、次の食事で不足分を補いましょう。');
+  }
+  function updateTriglyceride(r){var risk=String(r.triglycerideRisk||'');var advice=String(r.triglycerideAdvice||'');var card=$('triglycerideCard');card.classList.remove('attention','high');$('triglycerideFactors').innerHTML='';if(!risk||risk==='対象外'||!advice){hide(card);return}text($('triglycerideRisk'),risk);if(risk==='注意')card.classList.add('attention');if(risk==='高い')card.classList.add('high');var factors=Array.isArray(r.triglycerideFactors)?r.triglycerideFactors:String(r.triglycerideFactors||'').split(',');factors.filter(Boolean).slice(0,3).forEach(function(value){var chip=document.createElement('span');chip.className='tg-factor';chip.textContent=String(value).trim();$('triglycerideFactors').appendChild(chip)});text($('triglycerideAdvice'),advice);show(card)}
+  function appendList(parent,title,items){if(!Array.isArray(items)||!items.length)return;var section=document.createElement('section');section.className='report-section';var h=document.createElement('h3');h.textContent=title;section.appendChild(h);var ul=document.createElement('ul');items.forEach(function(item){var li=document.createElement('li');li.textContent=item;ul.appendChild(li)});section.appendChild(ul);parent.appendChild(section)}
+  function renderDetailedAdvice(data){var box=$('detailedAdviceResult');box.innerHTML='';var h=document.createElement('h3');h.textContent='AIからの具体的なアドバイス';box.appendChild(h);var p=document.createElement('p');p.textContent=data.answer||'';box.appendChild(p);appendList(box,'今日からできること',data.actionSteps);appendList(box,'置き換え例',data.replacementExamples);if(data.caution){var note=document.createElement('div');note.className='report-note';note.textContent=data.caution;box.appendChild(note)}show(box)}
+  function askDetailedAdvice(){if(!state.result){alert('先に食事を解析してください。');return}var s=settingsData();var q=value('advicePreset');if(value('adviceQuestion'))q+='\n追加質問：'+value('adviceQuestion');setBusy(true,'AIが具体的な改善策を考えています…');request({action:'detailAdvice',nickname:s.nickname,age:s.age,gender:s.gender,height:s.height,weight:value('weight')||'未設定',medicalConditions:s.medicalConditions,question:q,meal:state.result},true).then(function(d){renderDetailedAdvice(d.data||{})}).catch(function(e){alert('AI相談エラー：'+e.message)}).finally(function(){setBusy(false)})}
+  function openPlan(days){state.reportMode='mealPlan';state.planDays=days;show($('planPreferencesGroup'));text($('generatePlan'),'分析して献立を作る');text($('planOverlayTitle'),days===7?'🤖 7日間の分析と来週の献立':'🤖 30日間の分析と翌月の献立');$('planResult').innerHTML='';var cached=safeGet('lastMealPlan'+days);if(cached){try{renderMealPlan(JSON.parse(cached))}catch(e){hide($('planResult'))}}else hide($('planResult'));show($('planOverlay'))}
+  function openWeightAnalysis(days){state.reportMode='weightCauseAnalysis';state.planDays=days;hide($('planPreferencesGroup'));text($('generatePlan'),'体重と食事を照合して分析する');text($('planOverlayTitle'),days===180?'⚖️ 半年の体重増加要因分析':'⚖️ 3か月の体重増加要因分析');$('planResult').innerHTML='';var cached=safeGet('lastWeightAnalysis'+days);if(cached){try{renderWeightAnalysis(JSON.parse(cached))}catch(e){hide($('planResult'))}}else hide($('planResult'));show($('planOverlay'))}
+  function addReportText(parent,title,value){if(!value)return;var section=document.createElement('section');section.className='report-section';var h=document.createElement('h3');h.textContent=title;var p=document.createElement('p');p.textContent=value;section.appendChild(h);section.appendChild(p);parent.appendChild(section)}
+  function renderReportStats(parent,data){var s=data.stats||{};var avg=s.averagePerMeal||{};var items=[['記録件数',(data.recordCount||0)+'件'],['平均カロリー',avg.calories!=null?avg.calories+' kcal':'―'],['平均塩分',avg.salt!=null?avg.salt+' g':'―'],['中性脂肪「高い」',s.highTriglycerideMealCount!=null?s.highTriglycerideMealCount+'回':'―']];if(s.firstWeight!=null&&s.latestWeight!=null)items.push(['体重の変化',(Math.round((s.latestWeight-s.firstWeight)*10)/10)+' kg']);var grid=document.createElement('div');grid.className='report-stats';items.forEach(function(item){var card=document.createElement('div');card.className='report-stat';card.appendChild(document.createTextNode(item[0]));var b=document.createElement('b');b.textContent=item[1];card.appendChild(b);grid.appendChild(card)});parent.appendChild(grid)}
+  function renderMealPlan(data){var root=$('planResult');root.innerHTML='';var intro=document.createElement('div');intro.className='report-intro';var h=document.createElement('h2');h.textContent=data.title||'AI食生活レポート';var p=document.createElement('p');p.textContent=data.summary||'';var count=document.createElement('div');count.className='tap-test';count.textContent='分析した食事記録：'+(data.recordCount||0)+'件';intro.appendChild(h);intro.appendChild(p);intro.appendChild(count);root.appendChild(intro);renderReportStats(root,data);addReportText(root,'記録から分かったこと',data.dataOverview);appendList(root,'良かった点',data.strengths);appendList(root,'改善したい点',data.concerns);appendList(root,'次の期間の目標',data.goals);(data.planItems||[]).forEach(function(item){var card=document.createElement('article');card.className='plan-item';var title=document.createElement('h3');title.textContent=item.label||'献立';card.appendChild(title);[['重点',item.focus,'focus'],['朝',item.breakfast,''],['昼',item.lunch,''],['夕',item.dinner,''],['調整のコツ',item.tip,'']].forEach(function(row){if(!row[1])return;var line=document.createElement('p');if(row[2])line.className=row[2];var b=document.createElement('b');b.textContent=row[0]+'：';line.appendChild(b);line.appendChild(document.createTextNode(row[1]));card.appendChild(line)});root.appendChild(card)});appendList(root,'買い物・作り置きのコツ',data.shoppingTips);if(data.note){var note=document.createElement('div');note.className='report-note';note.textContent=data.note;root.appendChild(note)}show(root)}
+  function renderWeightAnalysis(data){var root=$('planResult');root.innerHTML='';var intro=document.createElement('div');intro.className='report-intro';var h=document.createElement('h2');h.textContent=data.title||'体重・食事分析';var p=document.createElement('p');p.textContent=data.conclusion||'';var count=document.createElement('div');count.className='tap-test';count.textContent='照合した食事記録：'+(data.recordCount||0)+'件 ／ 体重記録：'+((data.stats||{}).weightRecordCount||0)+'件';intro.appendChild(h);intro.appendChild(p);intro.appendChild(count);root.appendChild(intro);renderReportStats(root,data);addReportText(root,'体重の推移',data.weightTrendSummary);appendList(root,'記録上の根拠',data.evidence);appendList(root,'食事の傾向',data.foodPatterns);addReportText(root,'個数・おかわりの影響',data.refillAndQuantityImpact);appendList(root,'優先して取り組むこと',data.recommendations);if(data.limitations){var note=document.createElement('div');note.className='report-note';note.textContent='分析上の注意：'+data.limitations;root.appendChild(note)}show(root)}
+  function generateMealPlan(){var s=settingsData();var isWeight=state.reportMode==='weightCauseAnalysis';setBusy(true,isWeight?(state.planDays===180?'半年の体重と食事を照合しています…':'3か月の体重と食事を照合しています…'):(state.planDays===7?'7日間を分析して献立を作っています…':'30日間を分析して翌月の方針を作っています…'));var payload={action:isWeight?'weightCauseAnalysis':'mealPlan',periodDays:state.planDays,endDate:value('recordDate'),nickname:s.nickname,age:s.age,gender:s.gender,height:s.height,weight:value('weight')||'未設定',medicalConditions:s.medicalConditions};if(!isWeight)payload.preferences=value('planPreferences');request(payload,true).then(function(d){var data=d.data||{};if(isWeight){safeSet('lastWeightAnalysis'+state.planDays,JSON.stringify(data));renderWeightAnalysis(data)}else{safeSet('lastMealPlan'+state.planDays,JSON.stringify(data));renderMealPlan(data)}}).catch(function(e){alert((isWeight?'体重分析':'AI献立')+'エラー：'+e.message)}).finally(function(){setBusy(false)})}
+  function showResult(r){state.result=r;hide($('homeView'));hide($('historyView'));show($('resultView'));text($('resultMeal'),r.mealName||'記録完了');text($('resultScore'),r.score==='-'?'-':String(r.score)+'点');text($('resultCalories'),r.calories||0);text($('resultProtein'),r.protein||0);text($('resultFat'),r.fat||0);text($('resultCarbs'),r.carbs||0);text($('resultSalt'),r.salt||0);text($('resultAdvice'),r.advice||'');if(r.itemQuantitySummary){text($('itemQuantityResult'),'🍪 実際に食べた量：'+r.itemQuantitySummary+'（栄養計算に反映済み）');show($('itemQuantityResult'))}else hide($('itemQuantityResult'));if(r.riceRefillSummary){text($('riceRefillResult'),'🍚 '+r.riceRefillSummary+' を栄養計算に追加済み');show($('riceRefillResult'))}else hide($('riceRefillResult'));if(r.otherRefillSummary){text($('otherRefillResult'),'🍛 その他のおかわり：'+r.otherRefillSummary+'（栄養計算に反映済み）');show($('otherRefillResult'))}else hide($('otherRefillResult'));updateWarnings(r);updateHealthAnalysis(r);updatePfcCharts(r);updateTriglyceride(r);var miss=Array.isArray(r.missingNutrients)?r.missingNutrients.join('、'):(r.missingNutrients||'');if(miss){text($('resultMissing'),'不足しやすい栄養素：'+miss);show($('resultMissing'))}else hide($('resultMissing'));if(state.imagePreview){$('resultImage').src=state.imagePreview;show($('resultImage'))}else hide($('resultImage'));window.scrollTo(0,0)}
+  function submitSimple(extra,busyText){clearError();if(value('weight'))safeSet('userWeight',value('weight'));setBusy(true,busyText);state.imagePreview='';request(basePayload(extra),false).then(function(d){if(d&&!d.cancelled)showResult(d.data)}).catch(function(e){error('【送信エラー】\n'+e.message)}).finally(function(){setBusy(false)})}
+  function home(){show($('homeView'));hide($('resultView'));hide($('historyView'));state.imagePreview='';resetItemQuantity();resetRiceRefills();resetOtherRefill();window.scrollTo(0,0)}
+  function formatDate(v){var d=new Date(v);if(isNaN(d.getTime()))return v;return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+  function loadHistory(){if(!state.gasUrl){show($('settingsOverlay'));return}setBusy(true,'履歴を読み込んでいます…');fetch(state.gasUrl+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(d){if(d.status==='error')throw new Error(d.message);state.history=d.data||[];state.visible=10;renderHistory();hide($('homeView'));hide($('resultView'));show($('historyView'));window.scrollTo(0,0)}).catch(function(e){alert('履歴取得エラー：'+e.message)}).finally(function(){setBusy(false)})}
+  function renderHistory(){var list=$('historyList');list.innerHTML='';if(!state.history.length){list.innerHTML='<div class="card gray">まだ記録がありません。</div>';hide($('loadMore'));return}state.history.slice(0,state.visible).forEach(function(item,index){var div=document.createElement('div');var score=item.score==='-'?null:asNumber(item.score);var salt=asNumber(item.salt);var tgRisk=String(item.triglycerideRisk||'');var caution=(score!==null&&score<=50)||salt>=4||tgRisk==='高い';div.className='history-item'+(caution?' warning':'');var title=document.createElement('div');title.className='history-title';title.textContent=item.mealName||'';var date=document.createElement('div');date.className='history-date';date.textContent=formatDate(item.date);var meta=document.createElement('div');meta.className='history-meta';if(caution){var badge=document.createElement('span');badge.className='warning-badge';badge.textContent='⚠️ 注意';meta.appendChild(badge)}var values=[];if(item.score!==''&&item.score!=='-')values.push(item.score+'点');if(item.calories)values.push(item.calories+' kcal');if(item.salt)values.push('塩分 '+item.salt+'g');if(tgRisk)values.push('中性脂肪 '+tgRisk);if(item.weight)values.push('体重 '+item.weight+'kg');if(values.length){var detail=document.createElement('span');detail.textContent=values.join(' ／ ');meta.appendChild(detail)}var edit=document.createElement('button');edit.type='button';edit.className='edit-history';edit.textContent='編集';edit.addEventListener('click',function(){openEdit(item)});div.appendChild(date);div.appendChild(title);div.appendChild(meta);div.appendChild(edit);list.appendChild(div)});if(state.history.length>state.visible)show($('loadMore'));else hide($('loadMore'))}
+  function openEdit(item){state.editing=item;$('editMealName').value=(item.mealName||'').replace(/^\[.*?\]\s*/,'');$('editCalories').value=item.calories||0;$('editProtein').value=item.protein||0;$('editFat').value=item.fat||0;$('editCarbs').value=item.carbs||0;$('editSalt').value=item.salt||0;$('editWeight').value=item.weight||'';show($('editOverlay'))}
+  function saveEdit(){if(!state.editing)return;var data={mealName:value('editMealName'),calories:numberValue('editCalories'),protein:numberValue('editProtein'),fat:numberValue('editFat'),carbs:numberValue('editCarbs'),salt:numberValue('editSalt'),weight:numberValue('editWeight')};setBusy(true,'記録を更新しています…');request({action:'update',targetDate:state.editing.date,recordData:data},true).then(function(d){if(d.status==='success'){hide($('editOverlay'));if(state.result&&state.result.date===state.editing.date){Object.keys(data).forEach(function(k){state.result[k]=data[k]});showResult(state.result)}else{loadHistory()}}}).catch(function(e){alert('更新エラー：'+e.message)}).finally(function(){setBusy(false)})}
+  document.addEventListener('DOMContentLoaded',function(){
+    $('recordDate').value=today();loadSettings();
+    $('openSettings').addEventListener('click',function(){show($('settingsOverlay'))});$('closeSettings').addEventListener('click',function(){if(state.gasUrl)hide($('settingsOverlay'))});$('saveSettings').addEventListener('click',saveSettings);
+    $('mealTabs').addEventListener('click',function(e){var b=e.target.closest('[data-meal]');if(!b)return;state.mealType=b.getAttribute('data-meal');document.querySelectorAll('.meal-tab').forEach(function(x){x.classList.toggle('active',x===b)})});
+    $('riceSecond').addEventListener('change',updateRiceRefillRows);$('riceThird').addEventListener('change',updateRiceRefillRows);$('riceFourth').addEventListener('change',updateRiceRefillRows);updateRiceRefillRows();
+    $('recordDate').addEventListener('change',loadWeightForDate);
+    $('weight').addEventListener('input',function(){saveWeightForDate();text($('tapTest'),$('weight').value?'保存しました：'+$('weight').value+' kg（同じ日は再入力不要です）':'この日付の体重はまだ設定されていません。')});
+    $('cameraInput').addEventListener('change',function(){processImage(this)});$('galleryInput').addEventListener('change',function(){processImage(this)});
+    $('recordWeight').addEventListener('click',function(){if(!value('weight')){alert('体重を入力してください。');return}submitSimple({recordWeightOnly:true},'体重を記録しています…')});
+    $('toggleText').addEventListener('click',function(){var hidden=$('textAreaBox').classList.contains('hidden');if(hidden){show($('textAreaBox'));text($('toggleText'),'テキスト入力を閉じる')}else{hide($('textAreaBox'));text($('toggleText'),'📝 写真なしでテキスト入力する')}});
+    $('submitText').addEventListener('click',function(){if(!value('textInput')){alert('食事内容を入力してください。');return}submitSimple({textInput:value('textInput')},'AIが食事を解析しています…')});
+    $('skipMeal').addEventListener('click',function(){if(confirm($('recordDate').value+' の '+state.mealType+' を「食事なし」として記録しますか？'))submitSimple({skipMeal:true},'食事なしを記録しています…')});
+    $('showHistory').addEventListener('click',loadHistory);$('resultHistory').addEventListener('click',loadHistory);$('resultBack').addEventListener('click',home);$('historyBack').addEventListener('click',home);$('loadMore').addEventListener('click',function(){state.visible+=10;renderHistory()});
+    $('openAiConsult').addEventListener('click',function(){if(!state.result){alert('先に食事を解析してください。');return}$('detailedAdviceResult').innerHTML='';hide($('detailedAdviceResult'));show($('adviceOverlay'))});$('askDetailedAdvice').addEventListener('click',askDetailedAdvice);$('closeAdvice').addEventListener('click',function(){hide($('adviceOverlay'))});
+    $('weeklyPlan').addEventListener('click',function(){openPlan(7)});$('monthlyPlan').addEventListener('click',function(){openPlan(30)});$('weight90').addEventListener('click',function(){openWeightAnalysis(90)});$('weight180').addEventListener('click',function(){openWeightAnalysis(180)});$('generatePlan').addEventListener('click',generateMealPlan);$('closePlan').addEventListener('click',function(){hide($('planOverlay'))});
+    $('editResult').addEventListener('click',function(){if(state.result)openEdit(state.result)});$('closeEdit').addEventListener('click',function(){hide($('editOverlay'))});$('saveEdit').addEventListener('click',saveEdit);
+  });
+})();
+</script>
+</body>
+</html>

@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>健康食事アドバイザー 強化版 v1.5.2</title>
+  <title>健康食事アドバイザー 長期体重・実食量分析版 v1.6.0</title>
   <style>
     :root{--green:#059669;--green2:#047857;--pale:#ecfdf5;--blue:#2563eb;--orange:#ea580c;--red:#dc2626;--ink:#1f2937;--muted:#6b7280;--line:#d1d5db}
     *{box-sizing:border-box}
@@ -60,7 +60,7 @@
 <body>
 <div class="app">
   <header>
-    <div><div class="title">🥗 健康食事アドバイザー</div><div class="version">体重履歴検出修正版 v1.5.2</div></div>
+    <div><div class="title">🥗 健康食事アドバイザー</div><div class="version">長期体重・実食量分析版 v1.6.0</div></div>
     <button id="openSettings" class="header-btn" type="button" aria-label="設定">⚙️</button>
   </header>
 
@@ -141,6 +141,12 @@
         <div class="ai-tool-grid">
           <button id="weeklyPlan" class="btn blue" type="button">7日間を分析</button>
           <button id="monthlyPlan" class="btn orange" type="button">30日間を分析</button>
+        </div>
+        <h3 style="margin-top:18px">⚖️ 体重増加の要因分析</h3>
+        <p>実測体重と、個数・ごはん・その他のおかわりを含む食事記録を照合します。</p>
+        <div class="ai-tool-grid">
+          <button id="weight90" class="btn blue" type="button">3か月を分析</button>
+          <button id="weight180" class="btn orange" type="button">半年を分析</button>
         </div>
       </section>
       <div id="errorBox" class="error hidden"></div>
@@ -234,7 +240,7 @@
 <div id="planOverlay" class="overlay hidden">
   <div class="panel report-panel">
     <h2 id="planOverlayTitle">🤖 AI食生活レポート</h2>
-    <div class="form-group"><label for="planPreferences">献立の希望・条件（任意）</label><textarea id="planPreferences" placeholder="例：簡単調理、節約、和食中心、苦手な食材、1日の予算、外食が多い、飲酒・甘い飲料の頻度"></textarea></div>
+    <div id="planPreferencesGroup" class="form-group"><label for="planPreferences">献立の希望・条件（任意）</label><textarea id="planPreferences" placeholder="例：簡単調理、節約、和食中心、苦手な食材、1日の予算、外食が多い、飲酒・甘い飲料の頻度"></textarea></div>
     <button id="generatePlan" class="btn blue" type="button">分析して献立を作る</button>
     <div id="planResult" class="hidden"></div>
     <button id="closePlan" class="btn gray" type="button">閉じる</button>
@@ -272,7 +278,7 @@
 <script>
 (function(){
   'use strict';
-  var state={mealType:'朝ご飯',result:null,imagePreview:'',history:[],visible:10,editing:null,gasUrl:'',planDays:7};
+  var state={mealType:'朝ご飯',result:null,imagePreview:'',history:[],visible:10,editing:null,gasUrl:'',planDays:7,reportMode:'mealPlan'};
   var memoryStore={};
   function safeGet(key){try{var v=window.localStorage?window.localStorage.getItem(key):null;return v!==null?v:(memoryStore[key]||null)}catch(e){return memoryStore[key]||null}}
   function safeSet(key,val){memoryStore[key]=String(val==null?'':val);try{if(window.localStorage)window.localStorage.setItem(key,memoryStore[key])}catch(e){/* ストレージ利用不可でもアプリ動作を継続 */}}
@@ -368,11 +374,13 @@
   function appendList(parent,title,items){if(!Array.isArray(items)||!items.length)return;var section=document.createElement('section');section.className='report-section';var h=document.createElement('h3');h.textContent=title;section.appendChild(h);var ul=document.createElement('ul');items.forEach(function(item){var li=document.createElement('li');li.textContent=item;ul.appendChild(li)});section.appendChild(ul);parent.appendChild(section)}
   function renderDetailedAdvice(data){var box=$('detailedAdviceResult');box.innerHTML='';var h=document.createElement('h3');h.textContent='AIからの具体的なアドバイス';box.appendChild(h);var p=document.createElement('p');p.textContent=data.answer||'';box.appendChild(p);appendList(box,'今日からできること',data.actionSteps);appendList(box,'置き換え例',data.replacementExamples);if(data.caution){var note=document.createElement('div');note.className='report-note';note.textContent=data.caution;box.appendChild(note)}show(box)}
   function askDetailedAdvice(){if(!state.result){alert('先に食事を解析してください。');return}var s=settingsData();var q=value('advicePreset');if(value('adviceQuestion'))q+='\n追加質問：'+value('adviceQuestion');setBusy(true,'AIが具体的な改善策を考えています…');request({action:'detailAdvice',nickname:s.nickname,age:s.age,gender:s.gender,height:s.height,weight:value('weight')||'未設定',medicalConditions:s.medicalConditions,question:q,meal:state.result},true).then(function(d){renderDetailedAdvice(d.data||{})}).catch(function(e){alert('AI相談エラー：'+e.message)}).finally(function(){setBusy(false)})}
-  function openPlan(days){state.planDays=days;text($('planOverlayTitle'),days===7?'🤖 7日間の分析と来週の献立':'🤖 30日間の分析と翌月の献立');$('planResult').innerHTML='';var cached=safeGet('lastMealPlan'+days);if(cached){try{renderMealPlan(JSON.parse(cached))}catch(e){hide($('planResult'))}}else hide($('planResult'));show($('planOverlay'))}
+  function openPlan(days){state.reportMode='mealPlan';state.planDays=days;show($('planPreferencesGroup'));text($('generatePlan'),'分析して献立を作る');text($('planOverlayTitle'),days===7?'🤖 7日間の分析と来週の献立':'🤖 30日間の分析と翌月の献立');$('planResult').innerHTML='';var cached=safeGet('lastMealPlan'+days);if(cached){try{renderMealPlan(JSON.parse(cached))}catch(e){hide($('planResult'))}}else hide($('planResult'));show($('planOverlay'))}
+  function openWeightAnalysis(days){state.reportMode='weightCauseAnalysis';state.planDays=days;hide($('planPreferencesGroup'));text($('generatePlan'),'体重と食事を照合して分析する');text($('planOverlayTitle'),days===180?'⚖️ 半年の体重増加要因分析':'⚖️ 3か月の体重増加要因分析');$('planResult').innerHTML='';var cached=safeGet('lastWeightAnalysis'+days);if(cached){try{renderWeightAnalysis(JSON.parse(cached))}catch(e){hide($('planResult'))}}else hide($('planResult'));show($('planOverlay'))}
   function addReportText(parent,title,value){if(!value)return;var section=document.createElement('section');section.className='report-section';var h=document.createElement('h3');h.textContent=title;var p=document.createElement('p');p.textContent=value;section.appendChild(h);section.appendChild(p);parent.appendChild(section)}
   function renderReportStats(parent,data){var s=data.stats||{};var avg=s.averagePerMeal||{};var items=[['記録件数',(data.recordCount||0)+'件'],['平均カロリー',avg.calories!=null?avg.calories+' kcal':'―'],['平均塩分',avg.salt!=null?avg.salt+' g':'―'],['中性脂肪「高い」',s.highTriglycerideMealCount!=null?s.highTriglycerideMealCount+'回':'―']];if(s.firstWeight!=null&&s.latestWeight!=null)items.push(['体重の変化',(Math.round((s.latestWeight-s.firstWeight)*10)/10)+' kg']);var grid=document.createElement('div');grid.className='report-stats';items.forEach(function(item){var card=document.createElement('div');card.className='report-stat';card.appendChild(document.createTextNode(item[0]));var b=document.createElement('b');b.textContent=item[1];card.appendChild(b);grid.appendChild(card)});parent.appendChild(grid)}
   function renderMealPlan(data){var root=$('planResult');root.innerHTML='';var intro=document.createElement('div');intro.className='report-intro';var h=document.createElement('h2');h.textContent=data.title||'AI食生活レポート';var p=document.createElement('p');p.textContent=data.summary||'';var count=document.createElement('div');count.className='tap-test';count.textContent='分析した食事記録：'+(data.recordCount||0)+'件';intro.appendChild(h);intro.appendChild(p);intro.appendChild(count);root.appendChild(intro);renderReportStats(root,data);addReportText(root,'記録から分かったこと',data.dataOverview);appendList(root,'良かった点',data.strengths);appendList(root,'改善したい点',data.concerns);appendList(root,'次の期間の目標',data.goals);(data.planItems||[]).forEach(function(item){var card=document.createElement('article');card.className='plan-item';var title=document.createElement('h3');title.textContent=item.label||'献立';card.appendChild(title);[['重点',item.focus,'focus'],['朝',item.breakfast,''],['昼',item.lunch,''],['夕',item.dinner,''],['調整のコツ',item.tip,'']].forEach(function(row){if(!row[1])return;var line=document.createElement('p');if(row[2])line.className=row[2];var b=document.createElement('b');b.textContent=row[0]+'：';line.appendChild(b);line.appendChild(document.createTextNode(row[1]));card.appendChild(line)});root.appendChild(card)});appendList(root,'買い物・作り置きのコツ',data.shoppingTips);if(data.note){var note=document.createElement('div');note.className='report-note';note.textContent=data.note;root.appendChild(note)}show(root)}
-  function generateMealPlan(){var s=settingsData();setBusy(true,state.planDays===7?'7日間を分析して献立を作っています…':'30日間を分析して翌月の方針を作っています…');request({action:'mealPlan',periodDays:state.planDays,endDate:value('recordDate'),preferences:value('planPreferences'),nickname:s.nickname,age:s.age,gender:s.gender,height:s.height,weight:value('weight')||'未設定',medicalConditions:s.medicalConditions},true).then(function(d){var data=d.data||{};safeSet('lastMealPlan'+state.planDays,JSON.stringify(data));renderMealPlan(data)}).catch(function(e){alert('AI献立エラー：'+e.message)}).finally(function(){setBusy(false)})}
+  function renderWeightAnalysis(data){var root=$('planResult');root.innerHTML='';var intro=document.createElement('div');intro.className='report-intro';var h=document.createElement('h2');h.textContent=data.title||'体重・食事分析';var p=document.createElement('p');p.textContent=data.conclusion||'';var count=document.createElement('div');count.className='tap-test';count.textContent='照合した食事記録：'+(data.recordCount||0)+'件 ／ 体重記録：'+((data.stats||{}).weightRecordCount||0)+'件';intro.appendChild(h);intro.appendChild(p);intro.appendChild(count);root.appendChild(intro);renderReportStats(root,data);addReportText(root,'体重の推移',data.weightTrendSummary);appendList(root,'記録上の根拠',data.evidence);appendList(root,'食事の傾向',data.foodPatterns);addReportText(root,'個数・おかわりの影響',data.refillAndQuantityImpact);appendList(root,'優先して取り組むこと',data.recommendations);if(data.limitations){var note=document.createElement('div');note.className='report-note';note.textContent='分析上の注意：'+data.limitations;root.appendChild(note)}show(root)}
+  function generateMealPlan(){var s=settingsData();var isWeight=state.reportMode==='weightCauseAnalysis';setBusy(true,isWeight?(state.planDays===180?'半年の体重と食事を照合しています…':'3か月の体重と食事を照合しています…'):(state.planDays===7?'7日間を分析して献立を作っています…':'30日間を分析して翌月の方針を作っています…'));var payload={action:isWeight?'weightCauseAnalysis':'mealPlan',periodDays:state.planDays,endDate:value('recordDate'),nickname:s.nickname,age:s.age,gender:s.gender,height:s.height,weight:value('weight')||'未設定',medicalConditions:s.medicalConditions};if(!isWeight)payload.preferences=value('planPreferences');request(payload,true).then(function(d){var data=d.data||{};if(isWeight){safeSet('lastWeightAnalysis'+state.planDays,JSON.stringify(data));renderWeightAnalysis(data)}else{safeSet('lastMealPlan'+state.planDays,JSON.stringify(data));renderMealPlan(data)}}).catch(function(e){alert((isWeight?'体重分析':'AI献立')+'エラー：'+e.message)}).finally(function(){setBusy(false)})}
   function showResult(r){state.result=r;hide($('homeView'));hide($('historyView'));show($('resultView'));text($('resultMeal'),r.mealName||'記録完了');text($('resultScore'),r.score==='-'?'-':String(r.score)+'点');text($('resultCalories'),r.calories||0);text($('resultProtein'),r.protein||0);text($('resultFat'),r.fat||0);text($('resultCarbs'),r.carbs||0);text($('resultSalt'),r.salt||0);text($('resultAdvice'),r.advice||'');if(r.itemQuantitySummary){text($('itemQuantityResult'),'🍪 実際に食べた量：'+r.itemQuantitySummary+'（栄養計算に反映済み）');show($('itemQuantityResult'))}else hide($('itemQuantityResult'));if(r.riceRefillSummary){text($('riceRefillResult'),'🍚 '+r.riceRefillSummary+' を栄養計算に追加済み');show($('riceRefillResult'))}else hide($('riceRefillResult'));if(r.otherRefillSummary){text($('otherRefillResult'),'🍛 その他のおかわり：'+r.otherRefillSummary+'（栄養計算に反映済み）');show($('otherRefillResult'))}else hide($('otherRefillResult'));updateWarnings(r);updateHealthAnalysis(r);updatePfcCharts(r);updateTriglyceride(r);var miss=Array.isArray(r.missingNutrients)?r.missingNutrients.join('、'):(r.missingNutrients||'');if(miss){text($('resultMissing'),'不足しやすい栄養素：'+miss);show($('resultMissing'))}else hide($('resultMissing'));if(state.imagePreview){$('resultImage').src=state.imagePreview;show($('resultImage'))}else hide($('resultImage'));window.scrollTo(0,0)}
   function submitSimple(extra,busyText){clearError();if(value('weight'))safeSet('userWeight',value('weight'));setBusy(true,busyText);state.imagePreview='';request(basePayload(extra),false).then(function(d){if(d&&!d.cancelled)showResult(d.data)}).catch(function(e){error('【送信エラー】\n'+e.message)}).finally(function(){setBusy(false)})}
   function home(){show($('homeView'));hide($('resultView'));hide($('historyView'));state.imagePreview='';resetItemQuantity();resetRiceRefills();resetOtherRefill();window.scrollTo(0,0)}
@@ -395,7 +403,7 @@
     $('skipMeal').addEventListener('click',function(){if(confirm($('recordDate').value+' の '+state.mealType+' を「食事なし」として記録しますか？'))submitSimple({skipMeal:true},'食事なしを記録しています…')});
     $('showHistory').addEventListener('click',loadHistory);$('resultHistory').addEventListener('click',loadHistory);$('resultBack').addEventListener('click',home);$('historyBack').addEventListener('click',home);$('loadMore').addEventListener('click',function(){state.visible+=10;renderHistory()});
     $('openAiConsult').addEventListener('click',function(){if(!state.result){alert('先に食事を解析してください。');return}$('detailedAdviceResult').innerHTML='';hide($('detailedAdviceResult'));show($('adviceOverlay'))});$('askDetailedAdvice').addEventListener('click',askDetailedAdvice);$('closeAdvice').addEventListener('click',function(){hide($('adviceOverlay'))});
-    $('weeklyPlan').addEventListener('click',function(){openPlan(7)});$('monthlyPlan').addEventListener('click',function(){openPlan(30)});$('generatePlan').addEventListener('click',generateMealPlan);$('closePlan').addEventListener('click',function(){hide($('planOverlay'))});
+    $('weeklyPlan').addEventListener('click',function(){openPlan(7)});$('monthlyPlan').addEventListener('click',function(){openPlan(30)});$('weight90').addEventListener('click',function(){openWeightAnalysis(90)});$('weight180').addEventListener('click',function(){openWeightAnalysis(180)});$('generatePlan').addEventListener('click',generateMealPlan);$('closePlan').addEventListener('click',function(){hide($('planOverlay'))});
     $('editResult').addEventListener('click',function(){if(state.result)openEdit(state.result)});$('closeEdit').addEventListener('click',function(){hide($('editOverlay'))});$('saveEdit').addEventListener('click',saveEdit);
   });
 })();
