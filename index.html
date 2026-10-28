@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>健康食事アドバイザー 食事漏れ・間食・体重分析強化版 v1.7.0</title>
+  <title>健康食事アドバイザー 食事漏れ・間食・体重分析強化版 v1.7.1</title>
   <style>
     :root{--green:#059669;--green2:#047857;--pale:#ecfdf5;--blue:#2563eb;--orange:#ea580c;--red:#dc2626;--ink:#1f2937;--muted:#6b7280;--line:#d1d5db}
     *{box-sizing:border-box}
@@ -64,6 +64,9 @@
     .day-chip.missing{background:#ffedd5;border-color:#ea580c;color:#9a3412}
     .day-missing-alert{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;border:2px solid #ea580c;background:#fff7ed;color:#9a3412;border-radius:10px;padding:10px;margin-top:10px;font-weight:800;font-size:14px;line-height:1.6}.day-missing-alert.hidden{display:none}
     .day-help{color:#334155;font-size:13px;line-height:1.5;margin:8px 0 0}
+    .day-source{color:#334155;font-size:14px;line-height:1.5;margin:4px 0 0;overflow-wrap:anywhere}
+    .day-chip.unknown{background:#f1f5f9;border-color:#64748b;color:#334155}
+    .day-chip.pending{background:#dbeafe;border-color:#2563eb;color:#1e40af}
     .snack-alert{border:3px solid #ea580c;background:#fff7ed;color:#7c2d12;border-radius:16px;padding:15px;margin:12px 0;line-height:1.65;font-size:15px;font-weight:700;white-space:pre-wrap}
     .missing-meal-dialog{max-width:480px}.missing-meal-question{font-size:19px;color:#7c2d12;font-weight:900;line-height:1.55;margin:16px 0}
     .missing-meal-explain{color:#334155;line-height:1.65;font-size:14px}.missing-meal-actions .btn{margin-top:10px}
@@ -72,7 +75,7 @@
 <body>
 <div class="app">
   <header>
-    <div><div class="title">🥗 健康食事アドバイザー</div><div class="version">食事漏れ・間食・体重分析強化版 v1.7.0</div></div>
+    <div><div class="title">🥗 健康食事アドバイザー</div><div class="version">食事漏れ・間食・体重分析強化版 v1.7.1</div></div>
     <button id="openSettings" class="header-btn" type="button" aria-label="設定">⚙️</button>
   </header>
 
@@ -91,6 +94,7 @@
           <div id="dayStatusChips" class="day-chips">スプレッドシートの登録状況を確認中…</div>
           <div id="dayMissingAlert" class="day-missing-alert hidden"><span id="dayMissingText"></span><button id="checkMissingNow" class="mini-refresh" type="button">食べたか確認する</button></div>
           <p id="dayStatusHelp" class="day-help">食べなかった食事も「食事なし」で残すと、AIの分析が正確になります。</p>
+          <p id="dayStatusSource" class="day-source" aria-live="polite">確認元：接続先の確認中</p>
         </div>
       </div>
 
@@ -310,7 +314,7 @@
 <script>
 (function(){
   'use strict';
-  var state={mealType:'朝ご飯',result:null,imagePreview:'',history:[],visible:10,editing:null,gasUrl:'',planDays:7,reportMode:'mealPlan',dayStatus:null,dayRequest:0,pendingMeal:null,missingFor:null,missingDismissed:{}};
+  var state={mealType:'朝ご飯',result:null,imagePreview:'',history:[],visible:10,editing:null,gasUrl:'',planDays:7,reportMode:'mealPlan',dayStatus:null,dayRequest:0,pendingMeal:null,missingFor:null,missingDismissed:{},lastSave:null};
   var memoryStore={};
   function safeGet(key){try{var v=window.localStorage?window.localStorage.getItem(key):null;return v!==null?v:(memoryStore[key]||null)}catch(e){return memoryStore[key]||null}}
   function safeSet(key,val){memoryStore[key]=String(val==null?'':val);try{if(window.localStorage)window.localStorage.setItem(key,memoryStore[key])}catch(e){/* ストレージ利用不可でもアプリ動作を継続 */}}
@@ -377,7 +381,7 @@
     document.querySelectorAll('.meal-tab').forEach(function(x){x.classList.toggle('active',x.getAttribute('data-meal')===meal)});
   }
   function dueMissingMeals(data){
-    if(!data||!data.status)return [];
+    if(!data||!data.status||data.partial)return [];
     var now=new Date(),selected=value('recordDate');
     if(selected>today())return [];
     return ['朝ご飯','昼ご飯','夜ご飯'].filter(function(meal){
@@ -392,32 +396,76 @@
   }
   function renderDayStatus(data){
     var root=$('dayStatusChips');root.innerHTML='';
+    var valid=data&&data.status&&data.date===value('recordDate');
+    var saved=state.lastSave&&state.lastSave.date===value('recordDate')?state.lastSave:null;
     ['朝ご飯','昼ご飯','夜ご飯'].forEach(function(meal){
-      var v=data&&data.status?data.status[meal]:'未登録';
+      var v=valid?data.status[meal]:'確認できません';
+      var pending=saved&&saved.mealType===meal&&v!=='登録済み'&&v!=='食べなかった';
+      if(pending)v='保存済み・表示未照合';
       var todayDate=today(),now=new Date(),cutoff={'朝ご飯':10,'昼ご飯':15,'夜ご飯':21}[meal];
-      var future=data&&data.date>=todayDate&&(data.date>todayDate||now.getHours()<cutoff);
-      var b=document.createElement('span');b.className='day-chip '+(v==='登録済み'?'done':v==='食べなかった'?'skip':future?'':'missing');
+      var future=valid&&data.date>=todayDate&&(data.date>todayDate||now.getHours()<cutoff);
+      var kind=v==='登録済み'?'done':v==='食べなかった'?'skip':pending?'pending':v==='確認できません'?'unknown':(v==='未登録'&&!future)?'missing':'';
+      var b=document.createElement('span');b.className='day-chip '+kind;
       b.textContent=meal+'：'+v;root.appendChild(b);
     });
-    if(data&&data.counts&&data.counts['間食']){
+    if(valid&&data.counts&&data.counts['間食']){
       var s=document.createElement('span');s.className='day-chip';s.textContent='間食：'+data.counts['間食']+'件';root.appendChild(s);
     }
     var due=dueMissingMeals(data);if(due.length){text($('dayMissingText'),due.join('・')+'の登録が確認できません。');show($('dayMissingAlert'))}else hide($('dayMissingAlert'));
-    text($('dayStatusHelp'),data?'未登録でも食べていないとは限りません。時間が来たら確認し、次の食事を選ぶ際は確認画面を出します。':'登録状況を取得できませんでした。通信・GASの最新版反映を確認してください。');
+    var source=data?(data.partial?'一部の履歴だけで照合しました。未確認の食事は「未登録」と断定しません。': '登録済みはスプレッドシートの実記録から判定しています。'):'GASから正しい登録状況を取得できません。登録漏れとは判定しません。';
+    if(saved&&valid&&data.status[saved.mealType]!=='登録済み'&&data.status[saved.mealType]!=='食べなかった')source+=' 保存成功の応答がありますが、登録状況との照合が一致しません。GASの再デプロイと参照シートを確認してください。';
+    text($('dayStatusHelp'),source);
+    var detail=valid?'取得元：'+(data.sourceSheet||'シート名不明')+' ／ 照合日：'+data.date+' ／ 該当：'+(data.matchedCount==null?'確認中':data.matchedCount)+'件 ／ API：'+(data.apiVersion||'旧版'):'取得元：確認できません（URL・GASのデプロイを確認）';
+    text($('dayStatusSource'),detail);
+  }
+  function localRecordDay(raw){
+    var value=String(raw||'');
+    if(/T\d{2}:\d{2}/.test(value)){
+      var iso=new Date(value);
+      if(!isNaN(iso.getTime()))return iso.getFullYear()+'-'+String(iso.getMonth()+1).padStart(2,'0')+'-'+String(iso.getDate()).padStart(2,'0');
+    }
+    var match=value.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
+    if(match){return match[1]+'-'+match[2].padStart(2,'0')+'-'+match[3].padStart(2,'0')}
+    var d=new Date(raw);
+    if(!isNaN(d.getTime()))return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    return '';
+  }
+  function fromLegacyHistory(rows,date){
+    var status={'朝ご飯':'確認できません','昼ご飯':'確認できません','夜ご飯':'確認できません'},counts={'間食':0},found=0;
+    rows.forEach(function(row){
+      if(!row||localRecordDay(row.date)!==date)return;
+      var match=String(row.mealName||'').match(/^\s*[\[［【]\s*(朝ご飯|朝食|朝ごはん|昼ご飯|昼食|昼ごはん|夜ご飯|夕食|晩ご飯|間食)\s*[\]］】]/);
+      if(!match)return;
+      var names={'朝食':'朝ご飯','朝ごはん':'朝ご飯','昼食':'昼ご飯','昼ごはん':'昼ご飯','夕食':'夜ご飯','晩ご飯':'夜ご飯'};
+      var m=names[match[1]]||match[1];found++;
+      if(m==='間食')counts['間食']++;
+      else {var skip=/食事なし|スキップ/.test(row.mealName);status[m]=skip&&status[m]!=='登録済み'?'食べなかった':'登録済み'}
+    });
+    return {date:date,status:status,counts:counts,partial:true,sourceSheet:'旧版GASの直近履歴（最大50件）',matchedCount:found,apiVersion:'旧版'};
   }
   function refreshDayStatus(){
     var date=value('recordDate');if(!date||!state.gasUrl)return Promise.resolve(null);
     var token=++state.dayRequest;
+    text($('dayStatusChips'),'スプレッドシートを照合中…');hide($('dayMissingAlert'));
+    text($('dayStatusSource'),'スプレッドシートを照合中…');
     return fetch(state.gasUrl+'?action=dayStatus&date='+encodeURIComponent(date)+'&t='+Date.now(),{cache:'no-store'})
       .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
-      .then(function(d){if(d.status==='error')throw new Error(d.message);if(token!==state.dayRequest||date!==value('recordDate'))return null;
-        state.dayStatus=d.data;renderDayStatus(d.data);
-        if(d.data&&d.data.dailyWeight&&!value('weight')){
-          $('weight').value=d.data.dailyWeight;
-          text($('tapTest'),'スプレッドシートから読込：'+d.data.dailyWeight+' kg（同じ日の測定値）');
+      .then(function(d){if(d.status==='error')throw new Error(d.message||'取得エラー');if(token!==state.dayRequest||date!==value('recordDate'))return null;
+        var result;
+        if(d&&d.data&&d.data.status&&d.data.date===date&&['朝ご飯','昼ご飯','夜ご飯'].every(function(m){return typeof d.data.status[m]==='string'})){
+          result=d.data;
+        }else if(d&&Array.isArray(d.data)){
+          result=fromLegacyHistory(d.data,date);
+        }else{
+          throw new Error('日別判定APIが未対応です。GASを最新版に更新し「新バージョン」でデプロイしてください');
         }
-        return d.data;
-      }).catch(function(e){if(token===state.dayRequest){state.dayStatus=null;renderDayStatus(null);text($('dayStatusHelp'),'登録状況が取得できません：'+e.message+'。GASの更新・再デプロイを確認してください。');}return null});
+        state.dayStatus=result;renderDayStatus(result);
+        if(result.dailyWeight&&!value('weight')){
+          $('weight').value=result.dailyWeight;
+          text($('tapTest'),'スプレッドシートから読込：'+result.dailyWeight+' kg（同じ日の測定値）');
+        }
+        return result;
+      }).catch(function(e){if(token===state.dayRequest){state.dayStatus=null;renderDayStatus(null);text($('dayStatusHelp'),'登録状況を確認できません：'+e.message+'。実際に保存された食事を「未登録」とは表示していません。');}return null});
   }
   function firstMissingBefore(target,data){
     var list=['朝ご飯','昼ご飯','夜ご飯'];var end=list.indexOf(target);
@@ -500,9 +548,9 @@
   function renderMealPlan(data){var root=$('planResult');root.innerHTML='';var intro=document.createElement('div');intro.className='report-intro';var h=document.createElement('h2');h.textContent=data.title||'AI食生活レポート';var p=document.createElement('p');p.textContent=data.summary||'';var count=document.createElement('div');count.className='tap-test';count.textContent='分析した食事記録：'+(data.recordCount||0)+'件';intro.appendChild(h);intro.appendChild(p);intro.appendChild(count);root.appendChild(intro);renderReportStats(root,data);addReportText(root,'記録から分かったこと',data.dataOverview);appendList(root,'良かった点',data.strengths);appendList(root,'改善したい点',data.concerns);appendList(root,'次の期間の目標',data.goals);(data.planItems||[]).forEach(function(item){var card=document.createElement('article');card.className='plan-item';var title=document.createElement('h3');title.textContent=item.label||'献立';card.appendChild(title);[['重点',item.focus,'focus'],['朝',item.breakfast,''],['昼',item.lunch,''],['夕',item.dinner,''],['調整のコツ',item.tip,'']].forEach(function(row){if(!row[1])return;var line=document.createElement('p');if(row[2])line.className=row[2];var b=document.createElement('b');b.textContent=row[0]+'：';line.appendChild(b);line.appendChild(document.createTextNode(row[1]));card.appendChild(line)});root.appendChild(card)});appendList(root,'買い物・作り置きのコツ',data.shoppingTips);if(data.note){var note=document.createElement('div');note.className='report-note';note.textContent=data.note;root.appendChild(note)}show(root)}
   function renderWeightAnalysis(data){var root=$('planResult');root.innerHTML='';var intro=document.createElement('div');intro.className='report-intro';var h=document.createElement('h2');h.textContent=data.title||'体重・食事分析';var p=document.createElement('p');p.textContent=data.conclusion||'';var count=document.createElement('div');count.className='tap-test';count.textContent='照合した食事記録：'+(data.recordCount||0)+'件 ／ 体重記録：'+((data.stats||{}).weightRecordCount||0)+'件';intro.appendChild(h);intro.appendChild(p);intro.appendChild(count);root.appendChild(intro);renderReportStats(root,data);var ws=(data.stats||{});addReportText(root,'体重のデータ取得状況','検出した別日の体重：'+(ws.weightRecordCount||0)+'日分 ／ 別シートからの取得元：'+((ws.weightSources||[]).join('、')||'食事記録シートのみ')+' ／ 記録のある食事日：'+(ws.mealDayCount||0)+'日／'+(data.periodDays||'-')+'日。未登録日を0kcalとは扱いません。');addReportText(root,'体重の推移',data.weightTrendSummary);appendList(root,'記録上の根拠',data.evidence);appendList(root,'食事の傾向',data.foodPatterns);addReportText(root,'個数・おかわりの影響',data.refillAndQuantityImpact);appendList(root,'優先して取り組むこと',data.recommendations);if(data.limitations){var note=document.createElement('div');note.className='report-note';note.textContent='分析上の注意：'+data.limitations;root.appendChild(note)}show(root)}
   function generateMealPlan(){var s=settingsData();var isWeight=state.reportMode==='weightCauseAnalysis';setBusy(true,isWeight?(state.planDays===180?'半年の体重と食事を照合しています…':'3か月の体重と食事を照合しています…'):(state.planDays===7?'7日間を分析して献立を作っています…':'30日間を分析して翌月の方針を作っています…'));var payload={action:isWeight?'weightCauseAnalysis':'mealPlan',periodDays:state.planDays,endDate:value('recordDate'),nickname:s.nickname,age:s.age,gender:s.gender,height:s.height,weight:value('weight')||'未設定',medicalConditions:s.medicalConditions};if(!isWeight)payload.preferences=value('planPreferences');request(payload,true).then(function(d){var data=d.data||{};if(isWeight){safeSet('lastWeightAnalysis'+state.planDays,JSON.stringify(data));renderWeightAnalysis(data)}else{safeSet('lastMealPlan'+state.planDays,JSON.stringify(data));renderMealPlan(data)}}).catch(function(e){alert((isWeight?'体重分析':'AI献立')+'エラー：'+e.message)}).finally(function(){setBusy(false)})}
-  function showResult(r){state.result=r;refreshDayStatus();hide($('homeView'));hide($('historyView'));show($('resultView'));text($('resultMeal'),r.mealName||'記録完了');text($('resultScore'),r.score==='-'?'-':String(r.score)+'点');text($('resultCalories'),r.calories||0);text($('resultProtein'),r.protein||0);text($('resultFat'),r.fat||0);text($('resultCarbs'),r.carbs||0);text($('resultSalt'),r.salt||0);text($('resultAdvice'),r.advice||'');if(r.itemQuantitySummary){text($('itemQuantityResult'),'🍪 実際に食べた量：'+r.itemQuantitySummary+'（栄養計算に反映済み）');show($('itemQuantityResult'))}else hide($('itemQuantityResult'));if(r.riceRefillSummary){text($('riceRefillResult'),'🍚 '+r.riceRefillSummary+' を栄養計算に追加済み');show($('riceRefillResult'))}else hide($('riceRefillResult'));if(r.otherRefillSummary){text($('otherRefillResult'),'🍛 その他のおかわり：'+r.otherRefillSummary+'（栄養計算に反映済み）');show($('otherRefillResult'))}else hide($('otherRefillResult'));updateWarnings(r);var snack=r.snackAlert||{};if(snack.show){text($('snackAlertBox'),'🍪 間食の食べ過ぎに注意\n'+snack.message);show($('snackAlertBox'))}else hide($('snackAlertBox'));updateHealthAnalysis(r);updatePfcCharts(r);updateTriglyceride(r);var miss=Array.isArray(r.missingNutrients)?r.missingNutrients.join('、'):(r.missingNutrients||'');if(miss){text($('resultMissing'),'不足しやすい栄養素：'+miss);show($('resultMissing'))}else hide($('resultMissing'));if(state.imagePreview){$('resultImage').src=state.imagePreview;show($('resultImage'))}else hide($('resultImage'));window.scrollTo(0,0)}
+  function showResult(r){state.result=r;if(r&&r.savedReceipt){state.lastSave=r.savedReceipt}refreshDayStatus();hide($('homeView'));hide($('historyView'));show($('resultView'));text($('resultMeal'),r.mealName||'記録完了');text($('resultScore'),r.score==='-'?'-':String(r.score)+'点');text($('resultCalories'),r.calories||0);text($('resultProtein'),r.protein||0);text($('resultFat'),r.fat||0);text($('resultCarbs'),r.carbs||0);text($('resultSalt'),r.salt||0);text($('resultAdvice'),r.advice||'');if(r.itemQuantitySummary){text($('itemQuantityResult'),'🍪 実際に食べた量：'+r.itemQuantitySummary+'（栄養計算に反映済み）');show($('itemQuantityResult'))}else hide($('itemQuantityResult'));if(r.riceRefillSummary){text($('riceRefillResult'),'🍚 '+r.riceRefillSummary+' を栄養計算に追加済み');show($('riceRefillResult'))}else hide($('riceRefillResult'));if(r.otherRefillSummary){text($('otherRefillResult'),'🍛 その他のおかわり：'+r.otherRefillSummary+'（栄養計算に反映済み）');show($('otherRefillResult'))}else hide($('otherRefillResult'));updateWarnings(r);var snack=r.snackAlert||{};if(snack.show){text($('snackAlertBox'),'🍪 間食の食べ過ぎに注意\n'+snack.message);show($('snackAlertBox'))}else hide($('snackAlertBox'));updateHealthAnalysis(r);updatePfcCharts(r);updateTriglyceride(r);var miss=Array.isArray(r.missingNutrients)?r.missingNutrients.join('、'):(r.missingNutrients||'');if(miss){text($('resultMissing'),'不足しやすい栄養素：'+miss);show($('resultMissing'))}else hide($('resultMissing'));if(state.imagePreview){$('resultImage').src=state.imagePreview;show($('resultImage'))}else hide($('resultImage'));window.scrollTo(0,0)}
   function submitSimple(extra,busyText){clearError();if(value('weight'))safeSet('userWeight',value('weight'));setBusy(true,busyText);state.imagePreview='';request(basePayload(extra),false).then(function(d){if(d&&!d.cancelled)showResult(d.data)}).catch(function(e){error('【送信エラー】\n'+e.message)}).finally(function(){setBusy(false)})}
-  function home(){show($('homeView'));hide($('resultView'));hide($('historyView'));state.imagePreview='';resetItemQuantity();resetRiceRefills();resetOtherRefill();window.scrollTo(0,0)}
+  function home(){refreshDayStatus();show($('homeView'));hide($('resultView'));hide($('historyView'));state.imagePreview='';resetItemQuantity();resetRiceRefills();resetOtherRefill();window.scrollTo(0,0)}
   function formatDate(v){var d=new Date(v);if(isNaN(d.getTime()))return v;return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
   function loadHistory(){if(!state.gasUrl){show($('settingsOverlay'));return}setBusy(true,'履歴を読み込んでいます…');fetch(state.gasUrl+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(d){if(d.status==='error')throw new Error(d.message);state.history=d.data||[];state.visible=10;renderHistory();hide($('homeView'));hide($('resultView'));show($('historyView'));window.scrollTo(0,0)}).catch(function(e){alert('履歴取得エラー：'+e.message)}).finally(function(){setBusy(false)})}
   function renderHistory(){var list=$('historyList');list.innerHTML='';if(!state.history.length){list.innerHTML='<div class="card gray">まだ記録がありません。</div>';hide($('loadMore'));return}state.history.slice(0,state.visible).forEach(function(item,index){var div=document.createElement('div');var score=item.score==='-'?null:asNumber(item.score);var salt=asNumber(item.salt);var tgRisk=String(item.triglycerideRisk||'');var caution=(score!==null&&score<=50)||salt>=4||tgRisk==='高い';div.className='history-item'+(caution?' warning':'');var title=document.createElement('div');title.className='history-title';title.textContent=item.mealName||'';var date=document.createElement('div');date.className='history-date';date.textContent=formatDate(item.date);var meta=document.createElement('div');meta.className='history-meta';if(caution){var badge=document.createElement('span');badge.className='warning-badge';badge.textContent='⚠️ 注意';meta.appendChild(badge)}var values=[];if(item.score!==''&&item.score!=='-')values.push(item.score+'点');if(item.calories)values.push(item.calories+' kcal');if(item.salt)values.push('塩分 '+item.salt+'g');if(tgRisk)values.push('中性脂肪 '+tgRisk);if(item.weight)values.push('体重 '+item.weight+'kg');if(values.length){var detail=document.createElement('span');detail.textContent=values.join(' ／ ');meta.appendChild(detail)}var edit=document.createElement('button');edit.type='button';edit.className='edit-history';edit.textContent='編集';edit.addEventListener('click',function(){openEdit(item)});div.appendChild(date);div.appendChild(title);div.appendChild(meta);div.appendChild(edit);list.appendChild(div)});if(state.history.length>state.visible)show($('loadMore'));else hide($('loadMore'))}
@@ -510,6 +558,7 @@
   function saveEdit(){if(!state.editing)return;var data={mealName:value('editMealName'),calories:numberValue('editCalories'),protein:numberValue('editProtein'),fat:numberValue('editFat'),carbs:numberValue('editCarbs'),salt:numberValue('editSalt'),weight:numberValue('editWeight')};setBusy(true,'記録を更新しています…');request({action:'update',targetDate:state.editing.date,recordData:data},true).then(function(d){if(d.status==='success'){hide($('editOverlay'));if(state.result&&state.result.date===state.editing.date){Object.keys(data).forEach(function(k){state.result[k]=data[k]});showResult(state.result)}else{loadHistory()}}}).catch(function(e){alert('更新エラー：'+e.message)}).finally(function(){setBusy(false)})}
   document.addEventListener('DOMContentLoaded',function(){
     $('recordDate').value=today();loadSettings();if(state.gasUrl)refreshDayStatus();
+    document.addEventListener('visibilitychange',function(){if(!document.hidden&&state.gasUrl)refreshDayStatus()});
     $('openSettings').addEventListener('click',function(){show($('settingsOverlay'))});$('closeSettings').addEventListener('click',function(){if(state.gasUrl)hide($('settingsOverlay'))});$('saveSettings').addEventListener('click',saveSettings);
     $('mealTabs').addEventListener('click',function(e){var b=e.target.closest('[data-meal]');if(!b)return;checkMealSwitch(b.getAttribute('data-meal'))});
     $('riceSecond').addEventListener('change',updateRiceRefillRows);$('riceThird').addEventListener('change',updateRiceRefillRows);$('riceFourth').addEventListener('change',updateRiceRefillRows);updateRiceRefillRows();
