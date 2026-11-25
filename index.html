@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>健康食事管理 v1.9.0｜RE:SELF融合版</title>
+  <title>健康食事管理 v1.9.1｜RE:SELF融合版</title>
   <style>
     :root{--green:#059669;--green2:#047857;--pale:#ecfdf5;--blue:#2563eb;--orange:#ea580c;--red:#dc2626;--ink:#1f2937;--muted:#6b7280;--line:#d1d5db}
     *{box-sizing:border-box}
@@ -151,6 +151,36 @@ html,body{background:#edf6ef!important;color:#183327!important}
 @media(max-width:680px){.v19-hero{min-height:205px}.v19-header-brand{width:64%;padding:17px 6px 16px 15px}.v19-webrich{font-size:9px;margin-bottom:12px;padding:4px 11px}.v19-header-title{font-size:clamp(22px,5.6vw,34px);margin-bottom:6px}.v19-header-subtitle{font-size:11px;max-width:180px}.v19-header-version{top:6px;right:8px;font-size:9px;padding:5px 7px;z-index:2}.v19-settings-btn{right:10px;bottom:13px;width:38px;height:38px;font-size:20px!important}.v19-hero-art{width:85%;opacity:.91;object-position:56% center}.v19-nav{grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;padding:6px 8px;border-radius:0 0 12px 12px}.v19-nav-button{font-size:12px;min-height:62px;padding:6px 3px;gap:2px}.v19-nav-button .v19-nav-icon{font-size:21px}.app main{padding:17px 13px 40px!important;min-height:500px}.v19-homeheading{margin:0 0 13px}.v19-h1{font-size:21px}.v19-two{grid-template-columns:1fr;gap:12px}.v19-overview-heading{font-size:15px;padding:9px 12px}.v19-overview-body{padding:12px}.v19-weightline{gap:8px}.v19-quick{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:18px 0}.v19-action{min-height:82px;font-size:16px;padding:8px}.v19-action .v19-action-icon{font-size:25px}.v19-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.v19-feature{min-height:105px;flex-direction:column;gap:6px;padding:12px}.v19-feature strong{font-size:14px}.v19-feature small{font-size:11px}.v19-advisory{flex-direction:column;align-items:flex-start;gap:5px;padding:12px}.v19-current-label{font-size:12px}.v19-kg{font-size:29px}.v19-goal strong{font-size:16px}.v19-macro-number{font-size:22px}.v19-screen .focus-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.v19-mini-list{gap:7px}.v19-screen .focus-title-row h2{font-size:17px}}
 @media(max-width:365px){.v19-header-title{font-size:21px}.v19-header-subtitle{font-size:10px}.v19-nav-button{font-size:11px}.v19-feature strong{font-size:13px}.v19-macro-number{font-size:18px}}
 @media(prefers-reduced-motion:reduce){.v19-screen{animation:none}}
+/* v1.9.1: compact layout; preserve controls and existing APIs */
+.v191-version-strip{display:flex;justify-content:flex-end;align-items:center;background:#075e38;color:#fff;font-size:11px;font-weight:800;line-height:1.4;padding:3px 14px;letter-spacing:.02em}
+.v19-nav{gap:3px;padding:5px 9px}
+.v19-nav-button{min-height:58px;padding:5px 3px;gap:2px}
+.v19-nav-button .v19-nav-icon{font-size:23px}
+.v19-two{align-items:start;gap:12px}
+.v19-spark[hidden]{display:none!important}
+.v19-overview-body{padding:12px 15px}
+.v19-overview-heading{padding:9px 14px}
+.v19-goal-gap{margin-top:4px}
+.v19-quick{gap:9px;margin:16px 0 12px}
+.v19-action{min-height:80px;padding:8px 6px;gap:7px}
+.v19-feature-grid{gap:8px}
+.v19-feature{min-height:92px;padding:12px 10px;gap:7px}
+@media(max-width:680px){
+.v191-version-strip{font-size:10px;padding:3px 10px}
+.v19-nav{gap:2px;padding:4px 6px}
+.v19-nav-button{min-height:48px;padding:4px 2px;gap:1px;border-radius:9px}
+.v19-nav-button .v19-nav-icon{font-size:19px;line-height:1.1}
+.v19-two{gap:8px}
+.v19-overview-heading{padding:7px 10px}
+.v19-overview-body{padding:9px 11px}
+.v19-goal{padding:5px 8px}
+.v19-spark{height:62px;margin-top:4px}
+.v19-quick{gap:6px;margin:12px 0}
+.v19-action{min-height:60px;padding:6px 5px;gap:6px}
+.v19-feature-grid{gap:6px}
+.v19-feature{min-height:82px;padding:9px;gap:4px}
+}
+
 
   </style>
 </head>
@@ -910,7 +940,7 @@ function addNav(){var app=document.querySelector('.app'),header=app.querySelecto
  header.innerHTML='<div class="v19-hero">'+
   '<img class="v19-hero-art" alt="" aria-hidden="true" src="'+window.__V19_HERO__+'">'+
   '<div class="v19-header-brand"><div class="v19-webrich">WEBRICH</div><h1 class="v19-header-title">🥗 健康食事管理</h1><p class="v19-header-subtitle">食事・体重・栄養バランスを<br>トータルで管理！</p></div>'+
-  '<div class="v19-header-version">v1.9.0<br>RE:SELF融合版</div><button id="openSettings" class="header-btn v19-settings-btn" type="button" aria-label="設定を開く">⚙️</button></div>';
+  '<button id="openSettings" class="header-btn v19-settings-btn" type="button" aria-label="設定を開く">⚙️</button></div><div class="v191-version-strip">v1.9.1　RE:SELF融合版</div>';
  var nav=elem('nav','v19-nav');nav.setAttribute('aria-label','アプリのメインメニュー');
  [['dashboard','🏠','ホーム'],['meals','🍽️','食事記録'],['weight','⚖️','体重管理'],['analysis','📊','分析'],['menus','📖','定番メニュー'],['history','📅','履歴・グラフ']].forEach(function(a){
   var b=elem('button','v19-nav-button'+(a[0]==='dashboard'?' active':''));b.type='button';b.setAttribute('data-v19-screen',a[0]);b.setAttribute('aria-current',a[0]==='dashboard'?'page':'false');
@@ -922,7 +952,7 @@ function addNav(){var app=document.querySelector('.app'),header=app.querySelecto
 function makeDashboard(){var e=wrap('dashboard');
  e.innerHTML='<div class="v19-homeheading"><div><div class="v19-eyebrow">HEALTH & MEAL DASHBOARD</div><h2 class="v19-h1">今日の健康管理</h2><p class="v19-hint" id="v19DayText">食事・体重の記録を取得中…</p></div><button class="v19-refresh" id="v19Refresh" type="button">↻ 最新の記録</button></div>'+
  '<div class="v19-two">'+
-  '<article class="v19-overview"><div class="v19-overview-heading">⚖️ 体重の状況</div><div class="v19-overview-body"><div class="v19-weightline"><div><div class="v19-current-label">直近の実測体重</div><div class="v19-kg"><span id="v19Weight">—</span><small> kg</small></div></div><div class="v19-goal">目標体重<strong id="v19Goal">—</strong></div></div><div id="v19GoalGap" class="v19-goal-gap">目標まで —</div><svg class="v19-spark" id="v19Spark" viewBox="0 0 440 72" role="img" aria-label="直近30日の体重推移"></svg></div></article>'+
+  '<article class="v19-overview"><div class="v19-overview-heading">⚖️ 体重の状況</div><div class="v19-overview-body"><div class="v19-weightline"><div><div class="v19-current-label">直近の実測体重</div><div class="v19-kg"><span id="v19Weight">—</span><small> kg</small></div></div><div class="v19-goal">目標体重<strong id="v19Goal">—</strong></div></div><div id="v19GoalGap" class="v19-goal-gap">目標まで —</div><svg hidden class="v19-spark" id="v19Spark" viewBox="0 0 440 72" role="img" aria-label="直近30日の体重推移"></svg></div></article>'+
   '<article class="v19-overview nutrition"><div class="v19-overview-heading">🍽️ 選択日の摂取状況（朝＋昼）</div><div class="v19-overview-body"><div class="v19-macros"><div class="v19-macro orange"><span class="v19-macro-label">🔥 カロリー</span><span class="v19-macro-number"><span id="v19Calories">—</span><small> kcal</small></span></div><div class="v19-macro blue"><span class="v19-macro-label">💪 たんぱく質</span><span class="v19-macro-number"><span id="v19Protein">—</span><small> g</small></span></div><div class="v19-macro pink"><span class="v19-macro-label">💧 脂質</span><span class="v19-macro-number"><span id="v19Fat">—</span><small> g</small></span></div><div class="v19-macro green"><span class="v19-macro-label">🌾 炭水化物</span><span class="v19-macro-number"><span id="v19Carbs">—</span><small> g</small></span></div></div><p class="v19-data-source" id="v19RecordCount">朝食・昼食の登録内容から計算（未登録は0とはみなしません）</p></div></article></div>'+
  '<div class="v19-quick"><button type="button" class="v19-action" data-quick-meal="朝ご飯"><span class="v19-action-icon">🍞</span><span>朝食を記録</span></button><button type="button" class="v19-action lunch" data-quick-meal="昼ご飯"><span class="v19-action-icon">🍱</span><span>昼食を記録</span></button><button type="button" class="v19-action snack" data-quick-meal="間食"><span class="v19-action-icon">🍪</span><span>間食を記録</span></button><button type="button" class="v19-action weight" data-v19-go="weight"><span class="v19-action-icon">⚖️</span><span>体重を記録</span></button></div>'+
  '<div class="v19-feature-grid"><button type="button" class="v19-feature" data-v19-go="analysis"><span class="v19-feature-ico">📊</span><span><strong>AI分析</strong><small>食事・体重の傾向と改善策</small></span></button><button type="button" class="v19-feature" data-v19-go="menus"><span class="v19-feature-ico">👨‍🍳</span><span><strong>定番メニュー</strong><small>よく食べるメニューを登録</small></span></button><button type="button" class="v19-feature" data-v19-go="analysis"><span class="v19-feature-ico">📋</span><span><strong>食事プラン</strong><small>7日・30日の献立を提案</small></span></button><button type="button" class="v19-feature" data-v19-go="weight"><span class="v19-feature-ico">📈</span><span><strong>体重グラフ</strong><small>7日・14日・30日の推移</small></span></button></div>'+
@@ -960,7 +990,7 @@ function buildScreens(){var home=$('homeView'),children=Array.from(home.children
 }
 function mirrorWeight(){var day=dateSelected(),record=$('weight');if($('v19QuickDate'))$('v19QuickDate').value=day;if($('v19QuickWeight'))$('v19QuickWeight').value=record&&record.value||''}
 function weightLine(weights){var svg=$('v19Spark');if(!svg)return;while(svg.firstChild)svg.removeChild(svg.firstChild);
- var points=(weights||[]).filter(function(p){return p&&Number.isFinite(Number(p.weight))}).slice(-30);if(points.length<2){svg.setAttribute('aria-label','体重は2日分以上の記録があるとグラフ表示できます');return}
+ var points=(weights||[]).filter(function(p){return p&&Number.isFinite(Number(p.weight))}).slice(-30);svg.toggleAttribute('hidden',points.length<2);if(points.length<2){svg.setAttribute('aria-label','体重は2日分以上の記録があるとグラフ表示できます');return}
  var vals=points.map(function(p){return Number(p.weight)}),lo=Math.min.apply(null,vals)-0.35,hi=Math.max.apply(null,vals)+0.35;
  var coords=vals.map(function(v,i){return [12+i*(416/(vals.length-1)),61-48*(v-lo)/(hi-lo)]});
  var NS='http://www.w3.org/2000/svg';function el(t,attr){var a=document.createElementNS(NS,t);Object.keys(attr).forEach(function(k){a.setAttribute(k,attr[k])});svg.appendChild(a);return a}
